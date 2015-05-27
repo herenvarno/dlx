@@ -1,0 +1,19 @@
+#!/bin/sh
+
+if [ $# != 1 ];
+then
+	echo $#
+	echo "Argument error! use './sim [Component Name]' or './sim clean'"
+fi
+if [ $1 == "clean" ];
+then
+	if [ ! -d work ];
+	then
+		mkdir work
+	fi
+	cd work		
+	rm -rf ./*
+else
+	cd work
+	make -f ../Makefiles/$1.make
+fi
