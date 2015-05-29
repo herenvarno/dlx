@@ -5,7 +5,7 @@
 -- Author:
 -- Create: 2015-05-27
 -- Update: 2015-05-27
--- Status: UNTESTED
+-- Status: TESTED
 --------------------------------------------------------------------------------
 
 library ieee;
@@ -20,7 +20,7 @@ use work.Funcs.all;
 entity RegisterFile is
 	generic(
 		DATA_SIZE : integer := C_SYS_DATA_SIZE;
-		REG_NUM : integer := C_REG_NUM;
+		REG_NUM : integer := C_REG_NUM
 	);
 	port(
 		clk		: in std_logic;											-- clock
@@ -62,12 +62,12 @@ begin
 						d_out2 <= registers(to_integer(unsigned(rd2_addr)));
 					end if;
 					if wr_en = '1' then
-						if not wr_addr = (wr_addr'range => '0') then	-- Keep R0 always 0.
-							registers(to_integer(unsigned(wr_addr))) <= datain;
+						if wr_addr /= (wr_addr'range => '0') then	-- Keep R0 always 0.
+							registers(to_integer(unsigned(wr_addr))) <= d_in;
 						end if;
 					end if;
 				end if;
 			end if;
 		end if;
 	end process;
-end register_file_arch_behav;
+end register_file_arch;
