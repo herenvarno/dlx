@@ -4,8 +4,8 @@
 --
 -- Author:
 -- Create: 2015-05-28
--- Update: 2015-05-28
--- Status: UNFINISHED
+-- Update: 2015-05-30
+-- Status: TESTED
 --------------------------------------------------------------------------------
 
 library ieee;
@@ -36,7 +36,7 @@ begin
 		o <= i(DEST_SIZE-1 downto 0);
 	end generate;
 	
-	GE1: if DEST_SIZE > SRC_SIZE and METHOD='0' generate
+	GE1: if DEST_SIZE > SRC_SIZE generate
 		o(SRC_SIZE-1 downto 0) <= i;
 		GE10: if METHOD = '0' generate
 			o(DEST_SIZE-1 downto SRC_SIZE) <= (others => '0');

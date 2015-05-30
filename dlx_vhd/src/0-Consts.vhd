@@ -1,6 +1,11 @@
 --------------------------------------------------------------------------------
 -- FILE: Consts
 -- DESC: Define all constants.
+--
+-- Author:
+-- Create: 2015-05-20
+-- Update: 2015-05-30
+-- Status: TESTED
 --------------------------------------------------------------------------------
 
 library ieee;
@@ -10,11 +15,11 @@ package Consts is
 	constant C_SYS_DATA_SIZE 	: integer	:= 32;			-- Data size
 	constant C_SYS_ISTR_SIZE	: integer	:= 32;			-- Instruction size
 	constant C_SYS_ADDR_SIZE	: integer	:= 32;			-- Address size
-	constant C_SYS_CWRD_SIZE	: integer	:= 15;			-- Control Word size
+	constant C_SYS_CWRD_SIZE	: integer	:= 13;			-- Control Word size
 	constant C_SYS_CALU_SIZE	: integer	:= 2;			-- ALU control word size
 	constant C_SYS_OPCD_SIZE	: integer	:= 6;			-- Operation code size
 	constant C_SYS_FUNC_SIZE	: integer	:= 11;			-- Function code size
-	constant C_SYS_IMME_SIZE	: integer	:= 26;			-- Immediate value size
+	constant C_SYS_IMME_SIZE	: integer	:= 16;			-- Immediate value size
 	constant C_CTR_CALU_SIZE	: integer	:= 5;			-- ALU Operation Code size
 	constant C_CTR_DRCW_SIZE	: integer	:= 1;			-- Data Memory Control word size
 	constant C_ADD_SPARSITY		: integer	:= 4;			-- Sparsity of Adder carray generator
@@ -22,6 +27,7 @@ package Consts is
 	constant C_REG_GLOBAL_NUM	: integer	:= 8;			-- Number of Global register in register file
 	constant C_REG_GENERAL_NUM	: integer	:= 8;			-- Number of General registers (I/L/O) in register file
 	constant C_REG_WINDOW_NUM	: integer	:= 8;			-- Number of Windows in register file
+	constant C_RAM_IRAM_SIZE	: integer	:= 10;		-- IRAM size
 	
 	-- ALU Operations
 	constant OP_ADD		: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "00000";
@@ -53,12 +59,10 @@ package Consts is
 	constant CW_S3_SEL_B_0	: integer := 6;
 	constant CW_S3_SEL_B_1	: integer := 7;
 	constant CW_S3_LATCH	: integer := 8;
-	constant CW_S3_EQ_COND	: integer := 9;
-	constant CW_S4_WR_DRAM	: integer := 10;
-	constant CW_S4_LATCH	: integer := 11;
-	constant CW_S4_JUMP		: integer := 12;
-	constant CW_S4_SEL_WB	: integer := 13;
-	constant CW_S5_EN_WB	: integer := 14;
+	constant CW_S4_WR_DRAM	: integer := 9;
+	constant CW_S4_LATCH	: integer := 10;
+	constant CW_S4_SEL_WB	: integer := 11;
+	constant CW_S5_EN_WB	: integer := 12;
 	
 	
 end package Consts;

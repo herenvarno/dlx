@@ -4,8 +4,8 @@
 --
 -- Author:
 -- Create: 2015-05-24
--- Update: 2015-05-24
--- Status: UNFINISHED
+-- Update: 2015-05-30
+-- Status: TESTED
 --------------------------------------------------------------------------------
 
 library ieee;
@@ -149,7 +149,8 @@ architecture data_path_arch of DataPath is
 	signal s1_npc, s2_npc : std_logic_vector(ADDR_SIZE-1 downto 0);
 	signal s1_istr, s2_istr : std_logic_vector(ISTR_SIZE-1 downto 0);
 	signal s2_rf_en : std_logic;
-	signal s2_rd1_addr, s2_rd2_addr, s2_wr_addr, s3_wr_addr, s4_wr_addr, s5_wr_addr : std_logic_vector(REG_ADDR_SIZE-1 downto 0);
+	signal s2_rd1_addr, s2_rd2_addr, s2_wr_addr, s2_wr_addr_r, s2_wr_addr_i, s3_wr_addr, s4_wr_addr, s5_wr_addr : std_logic_vector(REG_ADDR_SIZE-1 downto 0);
+	signal s2_wr_addr_sel: std_logic;
 	signal s2_a, s2_b, s3_a, s3_b, s4_b : std_logic_vector(DATA_SIZE-1 downto 0);
 	signal s2_imm_i : std_logic_vector(IMME_SIZE-1 downto 0);
 	signal s2_imm_j : std_logic_vector(ISTR_SIZE-OPCD_SIZE-1 downto 0);
@@ -159,6 +160,7 @@ architecture data_path_arch of DataPath is
 	signal s3_alu_out, s4_alu_out : std_logic_vector(DATA_SIZE-1 downto 0);
 	signal s4_mem_out : std_logic_vector(DATA_SIZE-1 downto 0);
 	signal s4_result, s5_result : std_logic_vector(DATA_SIZE-1 downto 0);
+	signal zeros_opcd : std_logic_vector(OPCD_SIZE-1 downto 0):=(others=>'0');
 	
 begin
 	-- PIPELINE STATE 1 : [IF]
@@ -193,9 +195,18 @@ begin
 	
 	s2_rd1_addr <= s2_istr(ISTR_SIZE-OPCD_SIZE-1 downto ISTR_SIZE-OPCD_SIZE-REG_ADDR_SIZE);
 	s2_rd2_addr <= s2_istr(ISTR_SIZE-OPCD_SIZE-REG_ADDR_SIZE-1 downto ISTR_SIZE-OPCD_SIZE-2*REG_ADDR_SIZE);
-	s2_wr_addr <= s2_istr(ISTR_SIZE-OPCD_SIZE-2*REG_ADDR_SIZE-1 downto ISTR_SIZE-OPCD_SIZE-3*REG_ADDR_SIZE);
+	s2_wr_addr_r <= s2_istr(ISTR_SIZE-OPCD_SIZE-2*REG_ADDR_SIZE-1 downto ISTR_SIZE-OPCD_SIZE-3*REG_ADDR_SIZE);
+	s2_wr_addr_i <= s2_istr(ISTR_SIZE-OPCD_SIZE-REG_ADDR_SIZE-1 downto ISTR_SIZE-OPCD_SIZE-2*REG_ADDR_SIZE);
 	s2_imm_i <= s2_istr(IMME_SIZE-1 downto 0);
 	s2_imm_j <= s2_istr(ISTR_SIZE-OPCD_SIZE-1 downto 0);
+	P0:process(s2_istr(ISTR_SIZE-1 downto OPCD_SIZE))
+	begin
+		if s2_istr(ISTR_SIZE-1 downto OPCD_SIZE)=zeros_opcd then
+			s2_wr_addr_sel <= '0';
+		else
+			s2_wr_addr_sel <= '1';
+		end if;
+	end process;
 	
 	reg_a_out <= s2_a;
 	
@@ -219,6 +230,10 @@ begin
 	ADDER_ADDR: Adder
 	generic map(DATA_SIZE)
 	port map('0', s2_npc, s2_imm_j_ext, s2_addr_relative, open);
+	
+	MUX_WB_ADDR: Mux
+	generic map (REG_ADDR_SIZE)
+	port map (s2_wr_addr_sel, s2_wr_addr_r, s2_wr_addr_i, s2_wr_addr);
 	
 	-- REGISTERS : [ID]||[EXE]	
 	REG_A: Reg

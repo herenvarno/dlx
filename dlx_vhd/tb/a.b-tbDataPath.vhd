@@ -1,5 +1,6 @@
 library ieee;
 use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
 use work.Types.all;
 use work.Consts.all;
 use work.Funcs.all;
@@ -64,10 +65,10 @@ begin
 		clk <= not (clk) after 0.5 ns;
 	end process;
 	
-	rst <= '1';
-	istr_val <= x"00000000";
+	rst <= '0', '1' after 1 ns;
+	istr_val <= x"20410001", x"20420002" after 2 ns, x"20430003" after 3 ns, x"20440004" after 4 ns;
 	data_i_val <= x"00000000";
-	cw <= "000000000000000";
+	cw <= "1010101000011";
 	calu <= "00000";
 	
 	
