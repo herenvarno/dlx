@@ -27,7 +27,8 @@ package Consts is
 	constant C_REG_GLOBAL_NUM	: integer	:= 8;			-- Number of Global register in register file
 	constant C_REG_GENERAL_NUM	: integer	:= 8;			-- Number of General registers (I/L/O) in register file
 	constant C_REG_WINDOW_NUM	: integer	:= 8;			-- Number of Windows in register file
-	constant C_RAM_IRAM_SIZE	: integer	:= 10;		-- IRAM size
+	constant C_RAM_IRAM_SIZE	: integer	:= 1024;		-- IRAM size
+	constant C_RAM_DRAM_SIZE	: integer	:= 1024;		-- DRAM size
 	
 	-- ALU Operations
 	constant OP_ADD		: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "00000";
@@ -64,5 +65,56 @@ package Consts is
 	constant CW_S4_SEL_WB	: integer := 11;
 	constant CW_S5_EN_WB	: integer := 12;
 	
+	-- Instructions -- OpCode
+	constant OPCD_R		: std_logic_vector(C_SYS_OPCD_SIZE-1 downto 0) := "000000";	--0x00
+	constant OPCD_J		: std_logic_vector(C_SYS_OPCD_SIZE-1 downto 0) := "000010";	--0x02
+	constant OPCD_JAL	: std_logic_vector(C_SYS_OPCD_SIZE-1 downto 0) := "000011";	--0x03
+	constant OPCD_BEQZ	: std_logic_vector(C_SYS_OPCD_SIZE-1 downto 0) := "000100";	--0x04
+	constant OPCD_BNEZ	: std_logic_vector(C_SYS_OPCD_SIZE-1 downto 0) := "000101";	--0x05
+	constant OPCD_ADDI	: std_logic_vector(C_SYS_OPCD_SIZE-1 downto 0) := "001000";	--0x08
+	constant OPCD_ADDUI	: std_logic_vector(C_SYS_OPCD_SIZE-1 downto 0) := "001001";	--0x09
+	constant OPCD_SUBI	: std_logic_vector(C_SYS_OPCD_SIZE-1 downto 0) := "001010";	--0x0a
+	constant OPCD_SUBUI	: std_logic_vector(C_SYS_OPCD_SIZE-1 downto 0) := "001011";	--0x0b
+	constant OPCD_ANDI	: std_logic_vector(C_SYS_OPCD_SIZE-1 downto 0) := "001100";	--0x0c
+	constant OPCD_ORI	: std_logic_vector(C_SYS_OPCD_SIZE-1 downto 0) := "001101";	--0x0d
+	constant OPCD_XORI	: std_logic_vector(C_SYS_OPCD_SIZE-1 downto 0) := "001110";	--0x0e
+	constant OPCD_JR	: std_logic_vector(C_SYS_OPCD_SIZE-1 downto 0) := "010010";	--0x12
+	constant OPCD_JALR	: std_logic_vector(C_SYS_OPCD_SIZE-1 downto 0) := "010011";	--0x13
+	constant OPCD_SLLI	: std_logic_vector(C_SYS_OPCD_SIZE-1 downto 0) := "010100";	--0x14
+	constant OPCD_NOP	: std_logic_vector(C_SYS_OPCD_SIZE-1 downto 0) := "010101";	--0x15
+	constant OPCD_SRLI	: std_logic_vector(C_SYS_OPCD_SIZE-1 downto 0) := "010110";	--0x16
+	constant OPCD_SRAI	: std_logic_vector(C_SYS_OPCD_SIZE-1 downto 0) := "010111";	--0x17
+	constant OPCD_SEQI	: std_logic_vector(C_SYS_OPCD_SIZE-1 downto 0) := "011000";	--0x18
+	constant OPCD_SNEI	: std_logic_vector(C_SYS_OPCD_SIZE-1 downto 0) := "011001";	--0x19
+	constant OPCD_SLTI	: std_logic_vector(C_SYS_OPCD_SIZE-1 downto 0) := "011010";	--0x1a
+	constant OPCD_SGTI	: std_logic_vector(C_SYS_OPCD_SIZE-1 downto 0) := "011011";	--0x1b
+	constant OPCD_SLEI	: std_logic_vector(C_SYS_OPCD_SIZE-1 downto 0) := "011100";	--0x1c
+	constant OPCD_SGEI	: std_logic_vector(C_SYS_OPCD_SIZE-1 downto 0) := "011101";	--0x1d
+	constant OPCD_SLTUI	: std_logic_vector(C_SYS_OPCD_SIZE-1 downto 0) := "111010";	--0x3a
+	constant OPCD_SGTUI	: std_logic_vector(C_SYS_OPCD_SIZE-1 downto 0) := "111011";	--0x3b
+	constant OPCD_SLEUI	: std_logic_vector(C_SYS_OPCD_SIZE-1 downto 0) := "111100";	--0x3c
+	constant OPCD_SGEUI	: std_logic_vector(C_SYS_OPCD_SIZE-1 downto 0) := "111101";	--0x3d
+	
+	-- Instructions --FUNC
+	constant FUNC_SLL	: std_logic_vector(C_SYS_FUNC_SIZE-1 downto 0) := "00000000100"	--0x04
+	constant FUNC_SRL	: std_logic_vector(C_SYS_FUNC_SIZE-1 downto 0) := "00000000110"	--0x06
+	constant FUNC_SRA	: std_logic_vector(C_SYS_FUNC_SIZE-1 downto 0) := "00000000111"	--0x07
+	constant FUNC_ADD	: std_logic_vector(C_SYS_FUNC_SIZE-1 downto 0) := "00000100000"	--0x20
+	constant FUNC_ADDU	: std_logic_vector(C_SYS_FUNC_SIZE-1 downto 0) := "00000100001"	--0x21
+	constant FUNC_SUB	: std_logic_vector(C_SYS_FUNC_SIZE-1 downto 0) := "00000100010"	--0x22
+	constant FUNC_SUBU	: std_logic_vector(C_SYS_FUNC_SIZE-1 downto 0) := "00000100011"	--0x23
+	constant FUNC_AND	: std_logic_vector(C_SYS_FUNC_SIZE-1 downto 0) := "00000100100"	--0x24
+	constant FUNC_OR	: std_logic_vector(C_SYS_FUNC_SIZE-1 downto 0) := "00000100101"	--0x25
+	constant FUNC_XOR	: std_logic_vector(C_SYS_FUNC_SIZE-1 downto 0) := "00000100110"	--0x26
+	constant FUNC_SEQ	: std_logic_vector(C_SYS_FUNC_SIZE-1 downto 0) := "00000101000"	--0x28
+	constant FUNC_SNE	: std_logic_vector(C_SYS_FUNC_SIZE-1 downto 0) := "00000101001"	--0x29
+	constant FUNC_SLT	: std_logic_vector(C_SYS_FUNC_SIZE-1 downto 0) := "00000101010"	--0x2a
+	constant FUNC_SGT	: std_logic_vector(C_SYS_FUNC_SIZE-1 downto 0) := "00000101011"	--0x2b
+	constant FUNC_SLE	: std_logic_vector(C_SYS_FUNC_SIZE-1 downto 0) := "00000101100"	--0x2c
+	constant FUNC_SGE	: std_logic_vector(C_SYS_FUNC_SIZE-1 downto 0) := "00000101101"	--0x2d
+	constant FUNC_SLTU	: std_logic_vector(C_SYS_FUNC_SIZE-1 downto 0) := "00000111010"	--0x3a
+	constant FUNC_SGTU	: std_logic_vector(C_SYS_FUNC_SIZE-1 downto 0) := "00000111011"	--0x3b
+	constant FUNC_SLEU	: std_logic_vector(C_SYS_FUNC_SIZE-1 downto 0) := "00000111100"	--0x3c
+	constant FUNC_SGEU	: std_logic_vector(C_SYS_FUNC_SIZE-1 downto 0) := "00000111101"	--0x3d
 	
 end package Consts;
