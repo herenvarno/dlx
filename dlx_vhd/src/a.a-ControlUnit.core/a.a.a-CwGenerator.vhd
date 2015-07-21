@@ -4,7 +4,7 @@
 --
 -- Author:
 -- Create: 2015-05-30
--- Update: 2015-05-30
+-- Update: 2015-06-10
 -- Status: UNTESTED
 --------------------------------------------------------------------------------
 
@@ -12,30 +12,31 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 use work.Consts.all;
+use work.Funcs.all;
 
 --------------------------------------------------------------------------------
 -- ENTITY
 --------------------------------------------------------------------------------
 entity CwGenerator is
 	generic (
-		OPCD_SIZE	: integer := 6;			-- Op Code Size
-		CALU_SIZE	: integer := 2;			-- ALU Op Code Word Size
-		ISTR_SIZE	: integer := 32;		-- Instruction Register Size
-		FUNC_SIZE	: integer := 11;		-- Func Field Size for R-Type Ops
-		CWRD_SIZE	: integer := 15;			-- Control Word Size
-		REG_ADDR_SIZE : integer := MyLog2Ceil(C_REG_NUM)			-- Control Word Size
+		DATA_SIZE	: integer := C_SYS_DATA_SIZE;			-- Data Size
+		OPCD_SIZE	: integer := C_SYS_OPCD_SIZE;			-- Op Code Size
+		FUNC_SIZE	: integer := C_SYS_FUNC_SIZE;			-- Func Field Size for R-Type Ops
+		CWRD_SIZE	: integer := C_SYS_CWRD_SIZE;			-- Control Word Size
+		CALU_SIZE	: integer := C_CTR_CALU_SIZE			-- ALU Op Code Word Size
 	);
 	port (
-		clk		: in  std_logic;
-		rst		: in  std_logic;
-		ir		: in std_logic_vector(ISTR_SIZE-1 downto 0);
-		reg_a	: in std_logic_vector(DATA_SIZE-1 downto 0);
-		alu_o	: in std_logic_vector(DATA_SIZE-1 downto 0);
-		wb_o	: in std_logic_vector(DATA_SIZE-1 downto 0);
+		clk		: in std_logic;
+		rst		: in std_logic;
+		opcd	: in std_logic_vector(OPCD_SIZE-1 downto 0);
+		func	: in std_logic_vector(FUNC_SIZE-1 downto 0);
+		stall1	: in std_logic;
+		stall2	: in std_logic;
+		stall3	: in std_logic;
+		stall4	: in std_logic;
+		stall5	: in std_logic;
 		cw		: out std_logic_vector(CWRD_SIZE-1 downto 0);
-		calu	: out std_logic_vector(CALU_SIZE-1 downto 0);
-		reg4_addr_in : in std_logic_vector(REG_ADDR_SIZE downto 0);
-		reg5_addr_in : in std_logic_vector(REG_ADDR_SIZE downto 0)
+		calu	: out std_logic_vector(CALU_SIZE-1 downto 0)
 	);
 end CwGenerator;
 
@@ -43,10 +44,10 @@ end CwGenerator;
 -- ARCHITECTURE
 --------------------------------------------------------------------------------
 architecture cw_generator_arch of CwGenerator is
-	constant PIPELINE_STATGE: integer := 5;
+	constant PIPELINE_STAGE: integer := 5;
 	--constant UCODE_MEM_SIZE : integer := 2**OPCD_SIZE;
-	constant UCODE_MEM_SIZE : integer := 4*100;
-	constant RELOC_MEM_SIZE : integer := 2**6;
+	constant UCODE_MEM_SIZE : integer := 65;
+	constant RELOC_MEM_SIZE : integer := 64;
 	type ucode_mem_t is array (0 to UCODE_MEM_SIZE-1) of std_logic_vector(CWRD_SIZE-1 downto 0);
 	type reloc_mem_t is array (0 to RELOC_MEM_SIZE-1) of std_logic_vector(OPCD_SIZE+1 downto 0);	-- Mul by 4, since each instruction need 4 stages, IF stage do not count. 
 
@@ -86,7 +87,7 @@ architecture cw_generator_arch of CwGenerator is
 		x"00",	-- 0x20	UNUSED
 		x"00",	-- 0x21 UNUSED
 		x"00",	-- 0x22	UNUSED
-		x"00",	-- 0x23 UNUSED
+		x"29",	-- 0x23 LW
 		x"00",	-- 0x24 UNUSED
 		x"00",	-- 0x25 UNUSED
 		x"00",	-- 0x26 UNUSED
@@ -94,7 +95,7 @@ architecture cw_generator_arch of CwGenerator is
 		x"00",	-- 0x28 UNUSED
 		x"00",	-- 0x29 UNUSED
 		x"00",	-- 0x2a UNUSED
-		x"00",	-- 0x2b UNUSED
+		x"3d",	-- 0x2b SW
 		x"00",	-- 0x2c UNUSED
 		x"00",	-- 0x2d UNUSED
 		x"00",	-- 0x2e UNUSED
@@ -114,255 +115,217 @@ architecture cw_generator_arch of CwGenerator is
 		x"11",	-- 0x3c SLEUI
 		x"11",	-- 0x3d SGEUI
 		x"00",	-- 0x3e UNUSED
-		x"00", 	-- 0x3f UNUSED
-		
+		x"00" 	-- 0x3f UNUSED
 	);
 	signal ucode_mem : ucode_mem_t := (
-		"000000000000000",	-- 0x00 RESET
-		"000000000000000",  -- 0x01 R	[ID]	
-		"000000000000000",  --		R	[EXE]
-		"001010110000000",  --		R	[MEM]
-		"000000111000100",  --		R	[WB]
-		"000000000000101",  -- 0x05	J
-		"000000000000000",
-		"000000000000000",
-		"000000000000000",
-		"000000000000000",  -- 0x09	JAL
-		"000000000000000",
-		"000000000000000",
-		"000000000000000",
-		"000000000000000",	-- 0x0d	BEQZ/BENZ
-		"000000000000000",
-		"000000000000000",
-		"000000000000000",
-		"000000000000000",	-- 0x11	ADDI/ADDUI/...	
-		"000000000000000",
-		"000000000000000",
-		"000000000000000",
-		"000000000000000",	-- 0x15	JR
-		"000000000000000",
-		"000000000000000",
-		"000000000000000",
-		"000000000000000",	-- 0x19	JALR
-		"000000000000000",
-		"000000000000000",
-		"000000000000000",
-		"000000000000000",	-- 0x1d	NOP
-		"000000000000000",
-		"000000000000000",
-		"000000000000000"
+		"00000000000000000000",	-- 0x00 RESET
+		"00000000000001000000",	-- 0x01 R	[ID]	
+		"00000000011000000000",	--		R	[EXE]
+		"01100000000000000000",	--		R	[MEM]
+		"10000000000000000000",	--		R	[WB]
+		"00000000000001000110",	-- 0x05	J
+		"00000000000000000000",
+		"00000000000000000000",
+		"00000000000000000000",
+		"00000000000001010110",	-- 0x09	JAL
+		"00000000000000000000",
+		"00000000000000000000",
+		"00000000000000000000",
+		"00000000000001100000",	-- 0x0d	BEQZ/BENZ
+		"00000000000000000000",
+		"00000000000000000000",
+		"00000000000000000000",
+		"00000000000001000000",	-- 0x11	ADDI/ADDUI/...	
+		"00000000011010000000",
+		"01100000000000000000",
+		"10000000000000000000",
+		"00000000000001001010",	-- 0x15	JR
+		"00000000000000000000",
+		"00000000000000000000",
+		"00000000000000000000",
+		"00000000000001001010",	-- 0x19	JALR
+		"00000000000000000000",
+		"00000000000000000000",
+		"00000000000000000000",
+		"00000000000000000000",	-- 0x1d	NOP
+		"00000000000000000000",
+		"00000000000000000000",
+		"00000000000000000000",
+		"00000000000001000000",	-- 0x21	LB
+		"00000000011110000000",
+		"01111001000000000000",
+		"10000000000000000000",
+		"00000000000001000000",	-- 0x25	LH
+		"00000000011110000000",
+		"01111010000000000000",
+		"10000000000000000000",
+		"00000000000001000000",	-- 0x29	LW
+		"00000000011110000000",
+		"01111000000000000000",
+		"10000000000000000000",
+		"00000000000001000000",	-- 0x2d	LBU
+		"00000000011110000000",
+		"01111001100000000000",
+		"10000000000000000000",
+		"00000000000001000000",	-- 0x31	LHU
+		"00000000011110000000",
+		"01111010100000000000",
+		"10000000000000000000",
+		"00000000000001000000",	-- 0x35	SB
+		"00000000010010000000",
+		"01000101000000000000",
+		"00000000000000000000",
+		"00000000000001000000",	-- 0x39	SH
+		"00000000010010000000",
+		"01000110000000000000",
+		"00000000000000000000",
+		"00000000000001000000",	-- 0x3d	SW
+		"00000000010010000000",
+		"01000100000000000000",
+		"00000000000000000000"
 	);
-
-	signal cw1 : std_logic_vector(CWRD_SIZE-1 downto 0)=(CWRD_SIZE-1=>'1', others=>'0');
+	
+	signal cw1 : std_logic_vector(CWRD_SIZE-1 downto 0):=(CW_S1_LATCH=>'1', others=>'0');
 	signal cw2 : std_logic_vector(CWRD_SIZE-1 downto 0);
 	signal cw3 : std_logic_vector(CWRD_SIZE-1 downto 0);
 	signal cw4 : std_logic_vector(CWRD_SIZE-1 downto 0);
 	signal cw5 : std_logic_vector(CWRD_SIZE-1 downto 0);
-	signal cw3_0: std_logic_vector(CWRD_SIZE-1 downto 0);
-	signal cw4_0: std_logic_vector(CWRD_SIZE-1 downto 0);
+	signal cw_temp : std_logic_vector(CWRD_SIZE-1 downto 0);
+	signal cw_mask : std_logic_vector(CWRD_SIZE-1 downto 0);
 
-	signal upc2 : integer range 0 to 131072;
-	signal upc3 : integer range 0 to 131072;
-	signal upc4 : integer range 0 to 131072;
-	signal upc5 : integer range 0 to 131072;
+	signal upc2 : integer range 0 to 131072:=0;
+	signal upc3 : integer range 0 to 131072:=0;
+	signal upc4 : integer range 0 to 131072:=0;
+	signal upc5 : integer range 0 to 131072:=0;
 	signal i_count : integer range 0 to PIPELINE_STAGE;
-	signal opcd : std_logic_vector(OPCD_SIZE-1 downto 0);
 	signal relc : std_logic_vector(OPCD_SIZE+1 downto 0);
-	signal func : std_logic_vector(FUNC_SIZE-1 downto 0);
 	
-	constant REG_ADDR_SIZE : integer := MyLog2Ceil(C_REG_NUM);
-	signal rega_addr : std_logic_vector(REG_ADDR_SIZE-1 downto 0);
-	signal regb_addr : std_logic_vector(REG_ADDR_SIZE-1 downto 0);
-	signal regc_addr : std_logic_vector(REG_ADDR_SIZE-1 downto 0);
-	signal reg4_addr : std_logic_vector(REG_ADDR_SIZE-1 downto 0);
-	signal reg5_addr : std_logic_vector(REG_ADDR_SIZE-1 downto 0);
-	signal reg0_addr : std_logic_vector(REG_ADDR_SIZE-1 downto 0) := (others=>'0');
-	signal load_flag : std_logic;
-	signal load_flag_delay: std_logic;
+	signal calu2 : std_logic_vector(CALU_SIZE-1 downto 0);
   
 begin
-
+	cw1 <= (CW_S1_LATCH=>'1', others=>'0');
 	cw2 <= ucode_mem(upc2);
 	cw3 <= ucode_mem(upc3);
 	cw4 <= ucode_mem(upc4);
 	cw5 <= ucode_mem(upc5);
 	
-	-- for forwarding
-	cw4_fwd <= ucode_mem(upc4+1);
-	cw5_fwd <= cw5;
-	reg4_addr <= reg4_addr_in when cw4_fwd(CWRD-CW_S5_EN_WB-1)='1' and  else (others=>'0');
-	reg5_addr <= reg5_addr_in when cw5_fwd(CWRD-CW_S5_EN_WB-1)='1' else (others=>'0');
+	cw_mask(CW_S1_LATCH downto 0) <= (others=> (not stall1));
+	cw_mask(CW_S2_LATCH downto CW_S1_LATCH+1) <= (others=> (not stall2));
+	cw_mask(CW_S3_LATCH downto CW_S2_LATCH+1) <= (others=> (not stall3));
+	cw_mask(CW_S4_LATCH downto CW_S3_LATCH+1) <= (others=> (not stall4));
+	cw_mask(CWRD_SIZE-1 downto CW_S4_LATCH+1) <= (others=> (not stall5));
+	cw_temp <= (cw1 or cw2 or cw3 or cw4 or cw5);
+	cw <= cw_temp and cw_mask;
 	
-	opcd <= std_logic_vector(ir(ISTR_SIZE-1 downto ISTR_SIZE-OPCD_SIZE));
-	func <= std_logic_vector(ir(FUNC_SIZE-1 downto 0));
 	relc <= reloc_mem(to_integer(unsigned(opcd)));
 	
-
-	rega_addr <= ir(ISTR_SIZE-OPCD_SIZE-1 downto ISTR_SIZE-OPCD_SIZE-REG_ADDR_SIZE);
-	regb_addr <= ir(ISTR_SIZE-OPCD_SIZE-REG_ADDR_SIZE-1 downto ISTR_SIZE-OPCD_SIZE-2*REG_ADDR_SIZE);
-	regc_addr <= ir(ISTR_SIZE-OPCD_SIZE-2*REG_ADDR_SIZE-1 downto ISTR_SIZE-OPCD_SIZE-3*REG_ADDR_SIZE);
-	
-	cw <= ((cw1 or cw2) or (cw3_0 or cw4_0)) or cw5;
-
 	P_CALU: process (opcd, func)
 	begin
-		calu <= (others => '0');
+		calu2 <= (others => '0');
 		if (opcd = OPCD_R) then
 			if (func=FUNC_ADD) or (func=FUNC_ADDU) then		-- ADD
-				calu <= OP_ADD;
+				calu2 <= OP_ADD;
 			elsif (func=FUNC_AND) then						-- AND
-				calu <= OP_AND;
+				calu2 <= OP_AND;
 			elsif (func=FUNC_OR) then						-- OR
-				calu <= OP_OR;
+				calu2 <= OP_OR;
 			elsif (func=FUNC_XOR) then						-- AND
-				calu <= OP_XOR;
+				calu2 <= OP_XOR;
 			elsif (func=FUNC_SLL) then						-- SLL
-				calu <= OP_SLL;
+				calu2 <= OP_SLL;
 			elsif (func=FUNC_SRL) then						-- SRL
-				calu <= OP_SRL;
+				calu2 <= OP_SRL;
 			elsif (func=FUNC_SRA) then						-- SRA
-				calu <= OP_SRA;
+				calu2 <= OP_SRA;
 			elsif (func=FUNC_SUB) or (func=FUNC_SUBU) then	-- SUB
-				calu <= OP_SUB;
+				calu2 <= OP_SUB;
 			elsif (func = FUNC_SGT) then					-- SGT
-				calu <= OP_SGT;
+				calu2 <= OP_SGT;
 			elsif (func = FUNC_SGE) then					-- SGE
-				calu <= OP_SGE;
+				calu2 <= OP_SGE;
 			elsif (func = FUNC_SLT) then					-- SLT
-				calu <= OP_SLT;
+				calu2 <= OP_SLT;
 			elsif (func = FUNC_SLE) then					-- SLE
-				calu <= OP_SLE;
+				calu2 <= OP_SLE;
 			elsif (func = FUNC_SGTU) then					-- SGTU
-				calu <= OP_SGTU;
+				calu2 <= OP_SGTU;
 			elsif (func = FUNC_SGEU) then					-- SGEU
-				calu <= OP_SGEU;
+				calu2 <= OP_SGEU;
 			elsif (func = FUNC_SLTU) then					-- SLTU
-				calu <= OP_SLTU;
+				calu2 <= OP_SLTU;
 			elsif (func = FUNC_SLEU) then					-- SLEU
-				calu <= OP_SLEU;
+				calu2 <= OP_SLEU;
 			elsif (func = FUNC_SEQ) then					-- SEQ
-				calu <= OP_SEQ;
+				calu2 <= OP_SEQ;
 			elsif (func = FUNC_SNE) then					-- SNE
-				calu <= OP_SNE;
+				calu2 <= OP_SNE;
 			else
-				calu <= OP_ADD;
+				calu2 <= OP_ADD;
 			end if;
-		elsif (opcd=OPCD_ADDI) or (opcd=OPCD_ADDIU) then	-- ADD
-			calu <= OP_ADD;
-		elsif (opcd=OPCD_SUBI) or (opcd=OPCD_SUBIU) then	-- SUB
-			calu <= OP_SUB;
+		elsif (opcd=OPCD_ADDI) or (opcd=OPCD_ADDUI) then	-- ADD
+			calu2 <= OP_ADD;
+		elsif (opcd=OPCD_SUBI) or (opcd=OPCD_SUBUI) then	-- SUB
+			calu2 <= OP_SUB;
 		elsif opcd=OPCD_ANDI then							-- AND
-			calu <= OP_AND;
+			calu2 <= OP_AND;
 		elsif opcd=OPCD_ORI then							-- OR
-			calu <= OP_OR;
+			calu2 <= OP_OR;
 		elsif opcd=OPCD_XORI then							-- XOR
-			calu <= OP_XOR;
+			calu2 <= OP_XOR;
 		elsif opcd=OPCD_SLLI then							-- SLL
-			calu <= OP_SLL;
+			calu2 <= OP_SLL;
 		elsif opcd=OPCD_SRLI then							-- SRL
-			calu <= OP_SRL;
+			calu2 <= OP_SRL;
 		elsif opcd=OPCD_SRAI then							-- SRA
-			calu <= OP_SRA;
+			calu2 <= OP_SRA;
 		elsif opcd=OPCD_SEQI then							-- SEQ
-			calu <= OP_SEQ;
+			calu2 <= OP_SEQ;
 		elsif opcd=OPCD_SNEI then							-- SNE
-			calu <= OP_SNE;
+			calu2 <= OP_SNE;
 		elsif opcd=OPCD_SLTI then							-- SLT
-			calu <= OP_SLT;
+			calu2 <= OP_SLT;
 		elsif opcd=OPCD_SGTI then							-- SGT
-			calu <= OP_SGT;
+			calu2 <= OP_SGT;
 		elsif opcd=OPCD_SLEI then							-- SLE
-			calu <= OP_SLE;
+			calu2 <= OP_SLE;
 		elsif opcd=OPCD_SGEI then							-- SGE
-			calu <= OP_SGE;
+			calu2 <= OP_SGE;
 		elsif opcd=OPCD_SLTUI then							-- SLTU
-			calu <= OP_SLTU;
+			calu2 <= OP_SLTU;
 		elsif opcd=OPCD_SGTUI then							-- SGTU
-			calu <= OP_SGTU;
+			calu2 <= OP_SGTU;
 		elsif opcd=OPCD_SLEUI then							-- SLEU
-			calu <= OP_SLEU;
+			calu2 <= OP_SLEU;
 		elsif opcd=OPCD_SGEUI then							-- SGEU
-			calu <= OP_SGEU;
+			calu2 <= OP_SGEU;
 		else
-			calu <= OP_ADD;
+			calu2 <= OP_ADD;
 		end if;
-	end process ALU_OP_CODE_P;
+	end process;
 
+	upc2 <= to_integer(unsigned(relc)) when (stall2='0') else 0 when (rst='0');
 	P_CW: process (clk, rst)
 	begin
 		if rst = '0' then
-			upc2 <= 0;
+--			upc2 <= 0;
 			upc3 <= 0;
 			upc4 <= 0;
 			upc5 <= 0;
-			load_flag <= '0';
-			load_flag_delay <= '0';
 		elsif clk'event and clk = '1' then
-			if not stall_2 then
-				stall_2 <= stall_1;
-				upc2 <= to_integer(unsigned(relc));
-				if (opcd=OPCD_LB) or (opcd=OPCD_LH) or (opcd=OPCD_LW) or (opcd=LBU) or (opcd=LHU) or (opcd=LF) or (opcd=LD) then
-					load_flag <= '1';
-				else
-					load_flag <= '0';
-				end if;
-			end if;
-			if (upc2 /= 0) and (not stall_3) then
-				stall_3 <= stall_2;
+--			if stall2='0' then
+--				upc2 <= to_integer(unsigned(relc));
+--			end if;
+			if (upc2 /= 0) and (stall3='0') then
 				upc3 <= upc2+1;
-				load_flag_delay <= load_flag;
+				calu <= calu2;
 			end if;
-			if (upc3 /= 0) and (not stall_4) then
-				stall_4 <= stall_3;
+			if (upc3 /= 0) and (stall4='0') then
 				upc4 <= upc3+1;
 			end if;
-			if (upc4 /= 0) and (not stall_5) then
-				stall_5 <= stall_4;
+			if (upc4 /= 0) and (stall5='0') then
 				upc5 <= upc4+1;
 			end if;
-	end process uPC_Proc;
-	
-	P_FWD:process(cw3, rega_addr, regb_addr, reg4_addr, reg5_addr)
-	begin
-		if (cw3(CWRD_SIZE-CW_S3_SEL_A_1-1 downto CWRD_SIZE-CW_S3_SEL_A_0)="00") and rega_addr/=reg0_addr then
-			if rega_addr = reg4_addr then
-				if load_flag_delay then
-					stall_3 <= '1';
-				else
-					cw3_0(CWRD_SIZE-1 downto CW_S3_SEL_A_1) <= cw3(CWRD_SIZE-1 downto CW_S3_SEL_A_1);
-					cw3_0(CWRD_SIZE-CW_S3_SEL_A_1-1 downto CWRD_SIZE-CW_S3_SEL_A_0)<="10"
-					cw3_0(CWRD_SIZE-CW_S3_SEL_A_0-1 downto 0) <= cw3(CWRD_SIZE-CW_S3_SEL_A_0-1 downto 0);
-				end if;
-			elsif rega_addr = reg5_addr then
-				cw3_0(CWRD_SIZE-1 downto CW_S3_SEL_A_1) <= cw3(CWRD_SIZE-1 downto CW_S3_SEL_A_1);
-				cw3_0(CWRD_SIZE-CW_S3_SEL_A_1-1 downto CWRD_SIZE-CW_S3_SEL_A_0)<="11"
-				cw3_0(CWRD_SIZE-CW_S3_SEL_A_0-1 downto 0) <= cw3(CWRD_SIZE-CW_S3_SEL_A_0-1 downto 0);
-			else
-				cw3_0 <= cw3;
-			end if;
 		end if;
-		if (cw3(CWRD_SIZE-CW_S3_SEL_B_1-1 downto CWRD_SIZE-CW_S3_SEL_B_0)="00") and regb_addr/=reg0_addr then
-			if regb_addr = reg4_addr then
-				cw3_0(CWRD_SIZE-1 downto CW_S3_SEL_B_1) <= cw3(CWRD_SIZE-1 downto CW_S3_SEL_B_1);
-				cw3_0(CWRD_SIZE-CW_S3_SEL_B_1-1 downto CWRD_SIZE-CW_S3_SEL_B_0)<="10";
-				cw3_0(CWRD_SIZE-CW_S3_SEL_B_0-1 downto 0) <= cw3(CWRD_SIZE-CW_S3_SEL_B_0-1 downto 0);
-			elsif regb_addr = reg5_addr then
-				cw3_0(CWRD_SIZE-1 downto CW_S3_SEL_B_1) <= cw3(CWRD_SIZE-1 downto CW_S3_SEL_B_1);
-				cw3_0(CWRD_SIZE-CW_S3_SEL_B_1-1 downto CWRD_SIZE-CW_S3_SEL_B_0)<="11";
-				cw3_0(CWRD_SIZE-CW_S3_SEL_B_0-1 downto 0) <= cw3(CWRD_SIZE-CW_S3_SEL_B_0-1 downto 0);
-			else
-				cw3_0 <= cw3;
-			end if;
-		end if;
-		if regb_addr/=reg0_addr then
-			if regb_addr = reg5_addr then
-				cw4_0(CWRD_SIZE-1 downto CW_S4_SEL_BB) <= cw3(CWRD_SIZE-1 downto CW_S4_SEL_BB);
-				cw4_0(CWRD_SIZE-CW_S4_SEL_BB)<='1';
-				cw4_0(CWRD_SIZE-CW_S4_SEL_BB-1 downto 0) <= cw3(CWRD_SIZE-CW_S4_SEL_BB-1 downto 0);
-			else
-				cw4_0 <= cw4;
-			end if;
-		end if;
-	end if;
+	end process;
 	
 end cw_generator_arch;

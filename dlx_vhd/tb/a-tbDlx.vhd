@@ -43,7 +43,7 @@ begin
 	end process;
 	
 	-- Reset test
-	rst <= '0', '1' after 6 ns, '0' after 11 ns, '1' after 15 ns;
+	rst <= '0', '1' after 2 ns;
 end tb_dlx_arch;
 
 --------------------------------------------------------------------------------

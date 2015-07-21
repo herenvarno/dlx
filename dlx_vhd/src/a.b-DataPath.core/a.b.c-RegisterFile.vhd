@@ -29,12 +29,14 @@ entity RegisterFile is
 		rd1_en	: in std_logic;											-- read port 1
 		rd2_en	: in std_logic;											-- read port 2
 		wr_en	: in std_logic;											-- write port
+		link_en	: in std_logic;											-- save link reg
 		rd1_addr: in std_logic_vector(MyLog2Ceil(REG_NUM)-1 downto 0);	-- address of read port 1
 		rd2_addr: in std_logic_vector(MyLog2Ceil(REG_NUM)-1 downto 0);	-- address of read port 2
 		wr_addr	: in std_logic_vector(MyLog2Ceil(REG_NUM)-1 downto 0);	-- address of write port
 		d_out1	: out std_logic_vector(DATA_SIZE-1 downto 0);			-- data out 1 bus
 		d_out2	: out std_logic_vector(DATA_SIZE-1 downto 0);			-- data out 2 bus
-		d_in	: in std_logic_vector(DATA_SIZE-1 downto 0)				-- data in bus
+		d_in	: in std_logic_vector(DATA_SIZE-1 downto 0);			-- data in bus
+		d_link	: in std_logic_vector(DATA_SIZE-1 downto 0)				-- link register input bus
 	);
 end RegisterFile;
 
@@ -48,23 +50,34 @@ architecture register_file_arch of RegisterFile is
 begin
 	PROC: process(clk)
 	begin
-		if rising_edge(clk) then
-			if rst = '0' then
-				LO0: for i in 0 to REG_NUM-1 loop
-					registers(i) <= (others=>'0');
-				end loop;
-			else
+		if rst = '0' then
+			LO0: for i in 0 to REG_NUM-1 loop
+				registers(i) <= (others=>'0');
+			end loop;
+		else
+			if falling_edge(clk) then
 				if en = '1' then
 					if rd1_en= '1' then
-						d_out1 <= registers(to_integer(unsigned(rd1_addr)));
+						if wr_en = '1' and wr_addr=rd1_addr then
+							d_out1 <= d_in;
+						else
+							d_out1 <= registers(to_integer(unsigned(rd1_addr)));
+						end if;
 					end if;
 					if rd2_en='1' then
-						d_out2 <= registers(to_integer(unsigned(rd2_addr)));
+						if wr_en = '1' and wr_addr=rd2_addr then
+							d_out2 <= d_in;
+						else
+							d_out2 <= registers(to_integer(unsigned(rd2_addr)));
+						end if;
 					end if;
 					if wr_en = '1' then
 						if wr_addr /= (wr_addr'range => '0') then	-- Keep R0 always 0.
 							registers(to_integer(unsigned(wr_addr))) <= d_in;
 						end if;
+					end if;
+					if link_en = '1' then
+						registers(REG_NUM-1) <= d_link;
 					end if;
 				end if;
 			end if;

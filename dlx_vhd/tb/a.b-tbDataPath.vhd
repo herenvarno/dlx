@@ -70,8 +70,6 @@ begin
 	data_i_val <= x"00000000";
 	cw <= "1010101000011";
 	calu <= "00000";
-	
-	
 end tb_data_path_arch;
 
 configuration tb_data_path_cfg of tbDataPath is

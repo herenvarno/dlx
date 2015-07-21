@@ -26,44 +26,51 @@ end Dlx;
 
 architecture dlx_arch of Dlx is
 	-- Control Unit
-	component ControlUnit
-		generic (
-			MCDB_SIZE	: integer := C_SYS_MCDB_SIZE;	-- Microcode Database Size
-			FUNC_SIZE	: integer := C_SYS_FUNC_SIZE;	-- Func Field Size for R-Type Ops
-			OPCD_SIZE	: integer := C_SYS_OPCD_SIZE;	-- Operation Code Size
-			ISTR_SIZE	: integer := C_SYS_ISTR_SIZE;	-- Instruction Register Size    
-			CWRD_SIZE	: integer := C_SYS_CWRD_SIZE	-- Control Word Size
+	component ControlUnit is
+		generic(
+			ISTR_SIZE	: integer := C_SYS_ISTR_SIZE;			-- Instruction Register Size
+			DATA_SIZE	: integer := C_SYS_DATA_SIZE;			-- Data Size
+			OPCD_SIZE	: integer := C_SYS_OPCD_SIZE;			-- Op Code Size
+			FUNC_SIZE	: integer := C_SYS_FUNC_SIZE;			-- Func Field Size for R-Type Ops
+			CWRD_SIZE	: integer := C_SYS_CWRD_SIZE;			-- Control Word Size
+			CALU_SIZE	: integer := C_CTR_CALU_SIZE			-- ALU Op Code Word Size
 		);
-		port (
-			clk		: in std_logic;
-			rst		: in std_logic;	-- Active-Low
-			ir_in	: in std_logic_vector(ISTR_SIZE-1 downto 0);
-			cw		: out std_logic_vector(CWRD_SIZE-1 downto 0)
+		port(
+			clk		: in  std_logic;
+			rst		: in  std_logic;
+			ir		: in std_logic_vector(ISTR_SIZE-1 downto 0):=(others=>'0');
+			reg_a	: in std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
+			s2_branch_wait	: in std_logic;
+			s3_reg_a_wait	: in std_logic;
+			s3_reg_b_wait	: in std_logic;
+			cw		: out std_logic_vector(CWRD_SIZE-1 downto 0);
+			calu	: out std_logic_vector(CALU_SIZE-1 downto 0)
 		);
 	end component;
 	
 	-- Instruction RAM
-	component InstructionRam
+	component InstructionRam is
 		generic (
 			ADDR_SIZE : integer := C_SYS_ADDR_SIZE;
 			ISTR_SIZE : integer := C_SYS_ISTR_SIZE
 		);
 		port (
 			rst  : in std_logic;
-			addr : in std_logic_vector(ADDR_SIZE-1 downto 0);
+			addr : in std_logic_vector(ADDR_SIZE-1 downto 0):=(others=>'0');
 			iout : out std_logic_vector(ISTR_SIZE-1 downto 0)
 		);
 	end component;
 	
 	-- Data RAM 
-	component DataRam
+	component DataRam is
 		generic (
-			DRCW_SIZE : integer := C_SYS_DRCW_SIZE;	-- Data RAM Control Word: R/W
+			DRCW_SIZE : integer := C_CTR_DRCW_SIZE;	-- Data RAM Control Word: R/W
 			ADDR_SIZE : integer := C_SYS_ADDR_SIZE;
 			DATA_SIZE : integer := C_SYS_DATA_SIZE
 		);
 		port (
 			rst		: in std_logic;
+			en		: in std_logic;
 			addr	: in std_logic_vector(ADDR_SIZE-1 downto 0);
 			din		: in std_logic_vector(DATA_SIZE-1 downto 0);
 			dout	: out std_logic_vector(DATA_SIZE-1 downto 0);
@@ -72,36 +79,46 @@ architecture dlx_arch of Dlx is
 	end component;
 	
 	-- Datapath (MISSING!You must include it in your final project!)
-	component DataPath
+	component DataPath is
 		generic (
 			ADDR_SIZE : integer := C_SYS_ADDR_SIZE;
 			DATA_SIZE : integer := C_SYS_DATA_SIZE;
 			ISTR_SIZE : integer := C_SYS_ISTR_SIZE;
-			CWRD_SIZE : integer := C_SYS_CWRD_SIZE	-- Datapath Contrl Word
+			OPCD_SIZE : integer := C_SYS_OPCD_SIZE;
+			IMME_SIZE : integer := C_SYS_IMME_SIZE;
+			CWRD_SIZE : integer := C_SYS_CWRD_SIZE;	-- Datapath Contrl Word
+			CALU_SIZE : integer := C_CTR_CALU_SIZE;	
+			DRCW_SIZE : integer := C_CTR_DRCW_SIZE
 		);
-  		port (
-  			clk			: in std_logic;
-  			rst			: in std_logic;
-  			istr_addr	: out std_logic_vector(ADDR_SIZE-1 downto 0);
-  			istr_val	: in std_logic_vector(ISTR_SIZE-1 downto 0);
-  			ir_out		: out std_logic_vector(ISTR_SIZE-1 downto 0);
-  			data_addr	: out std_logic_vector(ADDR_SIZE-1 downto 0);
-  			data_i_val	: in std_logic_vector(DATA_SIZE-1 downto 0);
-  			data_o_val	: out std_logic_vector(DATA_SIZE-1 downto 0);
-  			cw			: in std_logic_vector(CWRD_SIZE-1 downto 0);
-  			dr_cw		: out std_logic_vector(DRCW_SIZE-1 downto 0)
-  		);
-  	end component;
+	  	port (
+	  		clk			: in std_logic;
+	  		rst			: in std_logic;
+	  		istr_addr	: out std_logic_vector(ADDR_SIZE-1 downto 0);
+	  		istr_val	: in std_logic_vector(ISTR_SIZE-1 downto 0):=(others=>'0');
+	  		ir_out		: out std_logic_vector(ISTR_SIZE-1 downto 0);
+	  		reg_a_out	: out std_logic_vector(DATA_SIZE-1 downto 0);
+	  		data_addr	: out std_logic_vector(ADDR_SIZE-1 downto 0);
+	  		data_i_val	: in std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
+	  		data_o_val	: out std_logic_vector(DATA_SIZE-1 downto 0);
+	  		cw			: in std_logic_vector(CWRD_SIZE-1 downto 0):=(others=>'0');
+	  		dr_cw		: out std_logic_vector(DRCW_SIZE-1 downto 0);
+	  		calu		: in std_logic_vector(CALU_SIZE-1 downto 0):=(others=>'0');
+	  		branch_wait	: out std_logic:='0';
+  			reg_a_wait	: out std_logic:='0';
+  			reg_b_wait	: out std_logic:='0'
+	  	);
+	end component;
 
 	-- CONSTANTS
-	MCDB_SIZE : integer := C_SYS_MCDB_SIZE;
-	FUNC_SIZE : integer := C_SYS_FUNC_SIZE;
-	OPCD_SIZE : integer := C_SYS_OPCD_SIZE;
-	ADDR_SIZE : integer := C_SYS_ADDR_SIZE;
-	DATA_SIZE : integer := C_SYS_DATA_SIZE;
-	ISTR_SIZE : integer := C_SYS_ISTR_SIZE;
-	CWRD_SIZE : integer := C_SYS_CWRD_SIZE;
-	DRCW_SIZE : integer := C_SYS_DRCW_SIZE;
+	constant FUNC_SIZE : integer := C_SYS_FUNC_SIZE;
+	constant OPCD_SIZE : integer := C_SYS_OPCD_SIZE;
+	constant ADDR_SIZE : integer := C_SYS_ADDR_SIZE;
+	constant DATA_SIZE : integer := C_SYS_DATA_SIZE;
+	constant ISTR_SIZE : integer := C_SYS_ISTR_SIZE;
+	constant CWRD_SIZE : integer := C_SYS_CWRD_SIZE;
+	constant DRCW_SIZE : integer := C_CTR_DRCW_SIZE;
+	constant CALU_SIZE : integer := C_CTR_CALU_SIZE;
+	constant IMME_SIZE : integer := C_SYS_IMME_SIZE;
 
 	-- SIGNALS
 	signal ir_bus	: std_logic_vector(ISTR_SIZE-1 downto 0);
@@ -112,22 +129,27 @@ architecture dlx_arch of Dlx is
 	signal ir		: std_logic_vector(ISTR_SIZE-1 downto 0);
 	signal cw		: std_logic_vector(CWRD_SIZE-1 downto 0);
 	signal dr_cw	: std_logic_vector(DRCW_SIZE-1 downto 0);
-	signal dp_cw	: std_logic_vector(DPCW_SIZE-1 downto 0);
+	signal calu		: std_logic_vector(CALU_SIZE-1 downto 0);
+	signal reg_a_val: std_logic_vector(DATA_SIZE-1 downto 0);
+	signal branch_wait:std_logic;
+	signal reg_a_wait:std_logic;
+	signal reg_b_wait:std_logic;
 	
 begin
 	CU0: ControlUnit
-	generic(MCDB_SIZE, FUNC_SIZE, OPCD_SIZE, ISTR_SIZE, CWRD_SIZE)
-	port(clk, rst, ir, cw);
+	generic map(ISTR_SIZE, DATA_SIZE, OPCD_SIZE, FUNC_SIZE, CWRD_SIZE, CALU_SIZE)
+	port map(clk, rst, ir, reg_a_val, branch_wait, reg_a_wait, reg_b_wait,cw, calu);
 	
 	IR0: InstructionRam
-	generic(ADDR_SIZE, ISTR_SIZE)
-	port(rst, pc_bus, ir_bus);
+	generic map(ADDR_SIZE, ISTR_SIZE)
+	port map(rst, pc_bus, ir_bus);
 	
 	DR0: DataRam
-	generic(DRCW_SIZE, ADDR_SIZE, DATA_SIZE)
-	port(rst, addr_bus, di_bus, do_bus, dr_cw);
+	generic map(DRCW_SIZE, ADDR_SIZE, DATA_SIZE)
+	port map(rst, '1', addr_bus, di_bus, do_bus, dr_cw);
 	
 	DP0: DataPath
-	generic(ADDR_SIZE, DATA_SIZE, ISTR_SIZE, CWRD_SIZE)
-	prot(clk, rst, pc_bus, ir_bus, ir, addr_bus, di_bus, do_bus, cw, dr_cw);
+	generic map(ADDR_SIZE, DATA_SIZE, ISTR_SIZE, OPCD_SIZE, IMME_SIZE, CWRD_SIZE, CALU_SIZE, DRCW_SIZE)
+	port map(clk, rst, pc_bus, ir_bus, ir, reg_a_val, addr_bus, do_bus, di_bus, cw, dr_cw, calu, branch_wait, reg_a_wait, reg_b_wait);
+	
 end dlx_arch;
