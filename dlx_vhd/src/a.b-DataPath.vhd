@@ -33,13 +33,13 @@ entity DataPath is
   		rst			: in std_logic;
   		istr_addr	: out std_logic_vector(ADDR_SIZE-1 downto 0);
   		istr_val	: in std_logic_vector(ISTR_SIZE-1 downto 0):=(others=>'0');
-  		ir_out		: out std_logic_vector(ISTR_SIZE-1 downto 0);
-  		reg_a_out	: out std_logic_vector(DATA_SIZE-1 downto 0);
-  		data_addr	: out std_logic_vector(ADDR_SIZE-1 downto 0);
+  		ir_out		: out std_logic_vector(ISTR_SIZE-1 downto 0):=(others=>'0');
+  		reg_a_out	: out std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
+  		data_addr	: out std_logic_vector(ADDR_SIZE-1 downto 0):=(others=>'0');
   		data_i_val	: in std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
-  		data_o_val	: out std_logic_vector(DATA_SIZE-1 downto 0);
+  		data_o_val	: out std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
   		cw			: in std_logic_vector(CWRD_SIZE-1 downto 0):=(others=>'0');
-  		dr_cw		: out std_logic_vector(DRCW_SIZE-1 downto 0);
+  		dr_cw		: out std_logic_vector(DRCW_SIZE-1 downto 0):=(others=>'0');
   		calu		: in std_logic_vector(CALU_SIZE-1 downto 0):=(others=>'0');
   		branch_wait	: out std_logic:='0';
   		reg_a_wait	: out std_logic:='0';
@@ -190,9 +190,8 @@ architecture data_path_arch of DataPath is
 	constant REG_ADDR_SIZE : integer := MyLog2Ceil(REG_NUM);
 	
 	-- Program Counters
-	signal s1_pc, s2_pc, s1_jpc, s2_jpc : std_logic_vector(ADDR_SIZE-1 downto 0):= (others=>'0');
+	signal s1_pc, s2_pc, s1_jpc, s2_jpc, s1_npc, s2_npc: std_logic_vector(ADDR_SIZE-1 downto 0):= (others=>'0');
 	signal s1_4 : std_logic_vector(DATA_SIZE-1 downto 0) := (2 => '1', others => '0');
-	signal s1_npc, s2_npc : std_logic_vector(ADDR_SIZE-1 downto 0):= (others=>'0');
 	
 	-- Instruction
 	signal s1_istr, s2_istr : std_logic_vector(ISTR_SIZE-1 downto 0):= (others=>'0');
@@ -203,40 +202,37 @@ architecture data_path_arch of DataPath is
 	signal s2_wr_addr_sel: std_logic:='0';
 	
 	-- ALU operands
-	signal s2_a, s2_b, s3_a, s3_b, s4_a, s4_b : std_logic_vector(DATA_SIZE-1 downto 0);
-	signal s2_imm_i : std_logic_vector(IMME_SIZE-1 downto 0);
-	signal s2_imm_j : std_logic_vector(ISTR_SIZE-OPCD_SIZE-1 downto 0);
-	signal s2_imm_i_ext, s2_imm_j_ext, s3_imm_i_ext : std_logic_vector(DATA_SIZE-1 downto 0);
-	signal s2_addr_relative, s2_addr_abs : std_logic_vector(ISTR_SIZE-1 downto 0);
+	signal s2_a, s2_b, s3_a, s3_b, s4_a, s4_b : std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
+	signal s2_imm_i : std_logic_vector(IMME_SIZE-1 downto 0):=(others=>'0');
+	signal s2_imm_j : std_logic_vector(ISTR_SIZE-OPCD_SIZE-1 downto 0):=(others=>'0');
+	signal s2_imm_i_ext, s2_imm_j_ext, s3_imm_i_ext : std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
 	signal s3_fwd_valid : std_logic;
-	signal s3_a_keep, s3_b_keep, s3_a_sel, s3_b_fwd, s3_b_sel, s4_b_sel : std_logic_vector(DATA_SIZE-1 downto 0);
-	signal s3_alu_out, s4_alu_out : std_logic_vector(DATA_SIZE-1 downto 0);
-	signal s4_mem_in, s4_mem_out : std_logic_vector(DATA_SIZE-1 downto 0);
-	signal s4_result, s5_result : std_logic_vector(DATA_SIZE-1 downto 0);
+	signal s3_a_keep, s3_b_keep, s3_a_sel, s3_b_fwd, s3_b_sel, s4_b_fwd : std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
+	signal s3_alu_out, s4_alu_out : std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
+	signal s4_mem_in, s4_mem_out : std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
+	signal s4_result, s5_result : std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
 	signal zeros_opcd : std_logic_vector(OPCD_SIZE-1 downto 0):=(others=>'0');
 	signal s2_jump_wait, s3_reg_a_wait, s3_reg_b_wait: std_logic:='0';
 	
-	signal s2_jump_addr_rel, s2_jump_addr_cal, s2_jump_addr_reg:std_logic_vector(ADDR_SIZE-1 downto 0);
+	signal s2_jump_addr_imm, s2_jump_addr_rel, s2_jump_addr_reg:std_logic_vector(ADDR_SIZE-1 downto 0):=(others=>'0');
 	signal s2_branch_flag: std_logic;
 	signal s2_a_reg_f_en: std_logic;
 	
-	signal s4_reg_a_wait, s4_reg_b_wait: std_logic;
+	signal s4_reg_a_wait, s4_reg_b_wait: std_logic:='0';
 	signal s3_b_sel_f_en:std_logic;
+	
+	signal s2_jump_test:std_logic_vector(ADDR_SIZE-1 downto 0):=(others=>'0');
 	
 	
 begin
 	-- PIPELINE STATE 1 : [IF]
+	istr_addr <= s1_pc;	-- to IRAM
 	s1_istr <= istr_val;	-- from IRAM
 	
 	-- NPC=PC+4
 	ADD_4: Adder
 	generic map (ADDR_SIZE)
-	port map ('0', s2_pc, s1_4, s1_npc, open);
-	
-	-- Choose from NPC and JUMP ADDRESS in case of JUMP.
-	MUX_PC: Mux
-	generic map (ADDR_SIZE)
-	port map (cw(CW_S2_JUMP), s1_npc, s2_jpc, s1_pc);
+	port map ('0', s1_pc, s1_4, s1_npc, open);
 	
 	-- REGISTERS : [IF]||[ID]
 	REG_PC: Reg
@@ -252,13 +248,24 @@ begin
 	port map (rst, cw(CW_S1_LATCH), clk, s1_npc, s2_npc);
 	
 	-- PIPELINE STAGE 2: [ID]
-	istr_addr <= s2_pc;	-- to IRAM
 	ir_out <= s2_istr;	-- to Control Unit
 	
 	s2_rd1_addr <= s2_istr(ISTR_SIZE-OPCD_SIZE-1 downto ISTR_SIZE-OPCD_SIZE-REG_ADDR_SIZE);
 	s2_rd2_addr <= s2_istr(ISTR_SIZE-OPCD_SIZE-REG_ADDR_SIZE-1 downto ISTR_SIZE-OPCD_SIZE-2*REG_ADDR_SIZE);
 	s2_imm_i <= s2_istr(IMME_SIZE-1 downto 0);
 	s2_imm_j <= s2_istr(ISTR_SIZE-OPCD_SIZE-1 downto 0);
+	
+	-- Choose from NPC and JUMP ADDRESS in case of JUMP.
+	MUX_PC: Mux
+	generic map (ADDR_SIZE)
+	port map (cw(CW_S2_JUMP), s2_npc, s2_jpc, s1_pc);
+	
+	----------------------------------------------------------------------------
+	-- FIXME
+	-- Weired!!!
+	-- Have to set the highest bit to 0 to avoid "Bound check failure"
+	----------------------------------------------------------------------------
+	s2_jpc <= s2_jump_test and x"7fffffff";
 	
 	----------------------------------------------------------------------------
 	-- NOTE:
@@ -295,8 +302,8 @@ begin
 	port map(cw(CW_S2_EXT_S), s2_imm_i, s2_imm_i_ext);
 	
 	EXT_J: Extender
-	generic map(ISTR_SIZE-OPCD_SIZE, DATA_SIZE)
-	port map('0', s2_imm_j, s2_imm_j_ext);
+	generic map(ISTR_SIZE-OPCD_SIZE, ADDR_SIZE)
+	port map('1', s2_imm_j, s2_imm_j_ext);
 	
 	----------------------------------------------------------------------------
 	-- NOTE:
@@ -312,21 +319,22 @@ begin
 	-- NOTE:
 	-- Jump address calculation
 	----------------------------------------------------------------------------
-	ADDER_ADDR: Adder
-	generic map(DATA_SIZE)
-	port map('0', s2_npc, s2_imm_i_ext, s2_jump_addr_rel, open);
 	
 	MUX_JPC0: Mux
 	generic map (ADDR_SIZE)
-	port map (cw(CW_S2_SEL_JA_0), s2_jump_addr_rel, s2_imm_j_ext, s2_jump_addr_cal);
-	
+	port map (cw(CW_S2_SEL_JA_0), s2_imm_i_ext, s2_imm_j_ext, s2_jump_addr_imm);
+
+	ADDER_ADDR: Adder
+	generic map(ADDR_SIZE)
+	port map('0', s2_npc, s2_jump_addr_imm, s2_jump_addr_rel, open);
+
 	MUX_JPC1: Mux
 	generic map (ADDR_SIZE)
-	port map (cw(CW_S2_SEL_JA_1), s2_jump_addr_cal, s2_jump_addr_reg, s1_jpc);
+	port map (cw(CW_S2_SEL_JA_1), s2_jump_addr_rel, s2_jump_addr_reg, s2_jump_test);
 	
 	PROG: process(s2_istr)
 	begin
-		if (s2_istr(ISTR_SIZE-1 downto ISTR_SIZE-OPCD_SIZE)=OPCD_BEQZ) or (s2_istr(ISTR_SIZE-1 downto ISTR_SIZE-OPCD_SIZE)=OPCD_BNEZ) then
+		if (s2_istr(ISTR_SIZE-1 downto ISTR_SIZE-OPCD_SIZE)=OPCD_BEQZ) or (s2_istr(ISTR_SIZE-1 downto ISTR_SIZE-OPCD_SIZE)=OPCD_BNEZ) or (s2_istr(ISTR_SIZE-1 downto ISTR_SIZE-OPCD_SIZE)=OPCD_JR) or (s2_istr(ISTR_SIZE-1 downto ISTR_SIZE-OPCD_SIZE)=OPCD_JALR) then
 			s2_branch_flag <= '1';
 		else
 			s2_branch_flag <= '0';
@@ -400,7 +408,7 @@ begin
 	
 	REG_BB: Reg
 	generic map(DATA_SIZE)
-	port map(rst, cw(CW_S3_LATCH), clk, s3_b_sel, s4_b_sel);
+	port map(rst, cw(CW_S3_LATCH), clk, s3_b_fwd, s4_b_fwd);
 	
 	REG_B_ADDR_3: Reg
 	generic map(REG_ADDR_SIZE)
@@ -447,7 +455,7 @@ begin
 	
 	FWDMUX_BB: FwdMux1
 	generic map(DATA_SIZE, REG_ADDR_SIZE)
-	port map(s4_b_sel, s5_result, s4_rd2_addr, s5_wr_addr, cw(CW_S5_EN_WB), '0', s4_mem_in, open);
+	port map(s4_b_fwd, s5_result, s4_rd2_addr, s5_wr_addr, cw(CW_S5_EN_WB), '0', s4_mem_in, open);
 	
 	MUX_RESULT: Mux
 	generic map(DATA_SIZE)

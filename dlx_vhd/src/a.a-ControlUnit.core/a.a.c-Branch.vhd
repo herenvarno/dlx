@@ -21,8 +21,9 @@ entity Branch is
 		OPCD_SIZE : integer := C_SYS_OPCD_SIZE
 	);
 	port (
-		reg_a	: in std_logic_vector(DATA_SIZE-1 downto 0);
-		opcd	: in std_logic_vector(OPCD_SIZE-1 downto 0);
+		rst		: in std_logic;
+		reg_a	: in std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
+		opcd	: in std_logic_vector(OPCD_SIZE-1 downto 0):=(others=>'0');
 		taken	: out std_logic := '0'
 	);
 end Branch;
@@ -32,12 +33,16 @@ end Branch;
 --------------------------------------------------------------------------------
 architecture branch_arch of Branch is
 begin
-	P0: process(reg_a, opcd)
+	P0: process(rst, reg_a, opcd)
 	begin
-		if (reg_a=(reg_a'range=>'0') and opcd=OPCD_BEQZ) or (reg_a/=(reg_a'range=>'0') and opcd=OPCD_BNEZ) then
-			taken <= '1';
-		else
+		if rst='0' then
 			taken <= '0';
+		else
+			if (reg_a=(reg_a'range=>'0') and opcd=OPCD_BEQZ) or (reg_a/=(reg_a'range=>'0') and opcd=OPCD_BNEZ) then
+				taken <= '1';
+			else
+				taken <= '0';
+			end if;
 		end if;
 	end process;
 end branch_arch;

@@ -70,8 +70,9 @@ architecture dlx_arch of Dlx is
 		);
 		port (
 			rst		: in std_logic;
+			clk		: in std_logic;
 			en		: in std_logic;
-			addr	: in std_logic_vector(ADDR_SIZE-1 downto 0);
+			addr	: in std_logic_vector(ADDR_SIZE-1 downto 0):=(others=>'0');
 			din		: in std_logic_vector(DATA_SIZE-1 downto 0);
 			dout	: out std_logic_vector(DATA_SIZE-1 downto 0);
 			dr_cw	: in std_logic_vector(DRCW_SIZE-1 downto 0)
@@ -146,7 +147,7 @@ begin
 	
 	DR0: DataRam
 	generic map(DRCW_SIZE, ADDR_SIZE, DATA_SIZE)
-	port map(rst, '1', addr_bus, di_bus, do_bus, dr_cw);
+	port map(rst, clk, '1', addr_bus, di_bus, do_bus, dr_cw);
 	
 	DP0: DataPath
 	generic map(ADDR_SIZE, DATA_SIZE, ISTR_SIZE, OPCD_SIZE, IMME_SIZE, CWRD_SIZE, CALU_SIZE, DRCW_SIZE)

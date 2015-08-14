@@ -60,10 +60,10 @@ entity Alu is
 		DATA_SIZE : integer := C_SYS_DATA_SIZE
 	);
 	port (
-		f : in std_logic_vector(4 downto 0);			-- Function
-		a : in std_logic_vector(DATA_SIZE-1 downto 0);	-- Data A
-		b : in std_logic_vector(DATA_SIZE-1 downto 0);	-- Data B
-		o : out std_logic_vector(DATA_SIZE-1 downto 0)	-- Data Out
+		f : in std_logic_vector(4 downto 0):=(others=>'0');			-- Function
+		a : in std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');	-- Data A
+		b : in std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');	-- Data B
+		o : out std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0')	-- Data Out
 	);
 end Alu;
 

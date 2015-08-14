@@ -21,6 +21,7 @@ architecture tb_data_ram_arch of tbDataRam is
 		);
 		port (
 			rst		: in std_logic;
+			en		: in std_logic;
 			addr	: in std_logic_vector(ADDR_SIZE-1 downto 0);
 			din		: in std_logic_vector(DATA_SIZE-1 downto 0);
 			dout	: out std_logic_vector(DATA_SIZE-1 downto 0);
@@ -39,19 +40,19 @@ architecture tb_data_ram_arch of tbDataRam is
 	signal ctrl2		: std_logic_vector(DRCW_SIZE-1 downto 0);
 begin
 	DRAM0: DataRam
-	port map(rst, addr, din, dout0, ctrl0);
+	port map(rst, '1', addr, din, dout0, ctrl0);
 	DRAM1: DataRam
-	port map(rst, addr, din, dout1, ctrl1);
+	port map(rst, '1', addr, din, dout1, ctrl1);
 	DRAM2: DataRam
-	port map(rst, addr, din, dout2, ctrl2);
+	port map(rst, '1', addr, din, dout2, ctrl2);
 
 	rst <= '0', '1' after 1 ns;
-	ctrl0(2) <= '1', '0' after 6 ns;
-	ctrl1(2) <= '1', '0' after 6 ns;
-	ctrl2(2) <= '1', '0' after 6 ns;
-	ctrl0(1 downto 0) <= "00";
-	ctrl1(1 downto 0) <= "01";
-	ctrl2(1 downto 0) <= "10";
+	ctrl0(3) <= '1', '0' after 6 ns;
+	ctrl1(3) <= '1', '0' after 6 ns;
+	ctrl2(3) <= '1', '0' after 6 ns;
+	ctrl0(2 downto 0) <= "000";
+	ctrl1(2 downto 0) <= "001";
+	ctrl2(2 downto 0) <= "010";
 	addr <= x"00000000", x"00000001" after 2 ns, x"00000002" after 3 ns, x"00000003" after 4 ns, x"00000004" after 5 ns, x"00000006" after 7 ns, x"00000007" after 8 ns, x"00000008" after 9 ns, x"00000009" after 10 ns;
 	din <=  x"00805060", x"08010001" after 2 ns, x"12f67002" after 3 ns, x"02028003" after 4 ns, x"08900204" after 5 ns, x"34502005" after 6 ns, x"030b2003" after 7 ns, x"01034602" after 8 ns, x"0f0a4601" after 9 ns, x"04660040" after 10 ns, x"0000000a" after 11 ns; 
 	

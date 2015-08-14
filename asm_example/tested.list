@@ -1,0 +1,6 @@
+STATE	FILE
+================================================================================
+OK		Jump.asm
+OK		JumpAndLink.asm
+OK		jr.asm
+OK		xor_swap.asm

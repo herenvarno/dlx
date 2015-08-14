@@ -28,15 +28,12 @@ entity CwGenerator is
 	port (
 		clk		: in std_logic;
 		rst		: in std_logic;
-		opcd	: in std_logic_vector(OPCD_SIZE-1 downto 0);
-		func	: in std_logic_vector(FUNC_SIZE-1 downto 0);
-		stall1	: in std_logic;
-		stall2	: in std_logic;
-		stall3	: in std_logic;
-		stall4	: in std_logic;
-		stall5	: in std_logic;
-		cw		: out std_logic_vector(CWRD_SIZE-1 downto 0);
-		calu	: out std_logic_vector(CALU_SIZE-1 downto 0)
+		opcd	: in std_logic_vector(OPCD_SIZE-1 downto 0):=(others=>'0');
+		func	: in std_logic_vector(FUNC_SIZE-1 downto 0):=(others=>'0');
+		stall_flag	: in std_logic_vector(4 downto 0):=(others=>'0');
+		taken	: in std_logic;
+		cw		: out std_logic_vector(CWRD_SIZE-1 downto 0):=(others=>'0');
+		calu	: out std_logic_vector(CALU_SIZE-1 downto 0):=(others=>'0')
 	);
 end CwGenerator;
 
@@ -46,11 +43,16 @@ end CwGenerator;
 architecture cw_generator_arch of CwGenerator is
 	constant PIPELINE_STAGE: integer := 5;
 	--constant UCODE_MEM_SIZE : integer := 2**OPCD_SIZE;
-	constant UCODE_MEM_SIZE : integer := 65;
+	constant UCODE_MEM_SIZE : integer := 69;
 	constant RELOC_MEM_SIZE : integer := 64;
 	type ucode_mem_t is array (0 to UCODE_MEM_SIZE-1) of std_logic_vector(CWRD_SIZE-1 downto 0);
 	type reloc_mem_t is array (0 to RELOC_MEM_SIZE-1) of std_logic_vector(OPCD_SIZE+1 downto 0);	-- Mul by 4, since each instruction need 4 stages, IF stage do not count. 
 
+	signal stall1 : std_logic;
+	signal stall2 : std_logic;
+	signal stall3 : std_logic;
+	signal stall4 : std_logic;
+	signal stall5 : std_logic;
 	signal reloc_mem : reloc_mem_t := (
 		x"01",	-- 0x00 R
 		x"00",	-- 0x01 UNUSED 
@@ -61,13 +63,13 @@ architecture cw_generator_arch of CwGenerator is
 		x"00",	-- 0x06 UNUSED
 		x"00",	-- 0x07	UNUSED
 		x"11",	-- 0x08 ADDI
-		x"11",	-- 0x09 ADDUI
+		x"41",	-- 0x09 ADDUI
 		x"11",	-- 0x0a SUBI
-		x"11",	-- 0x0b SUBUI
+		x"41",	-- 0x0b SUBUI
 		x"11",	-- 0x0c ANDI
 		x"11",	-- 0x0d ORI
 		x"11",	-- 0x0e XORI
-		x"00",	-- 0x0f UNUSED
+		x"11",	-- 0x0f LHI
 		x"00",	-- 0x10	UNUSED
 		x"00",	-- 0x11 UNUSED
 		x"15",	-- 0x12	JR
@@ -84,16 +86,16 @@ architecture cw_generator_arch of CwGenerator is
 		x"11",	-- 0x1d SGEI
 		x"00",	-- 0x1e UNUSED
 		x"00",	-- 0x1f UNUSED
-		x"00",	-- 0x20	UNUSED
-		x"00",	-- 0x21 UNUSED
+		x"21",	-- 0x20	LB
+		x"25",	-- 0x21 LH
 		x"00",	-- 0x22	UNUSED
 		x"29",	-- 0x23 LW
-		x"00",	-- 0x24 UNUSED
-		x"00",	-- 0x25 UNUSED
+		x"2d",	-- 0x24 LBU
+		x"31",	-- 0x25 LHU
 		x"00",	-- 0x26 UNUSED
 		x"00",	-- 0x27	UNUSED
-		x"00",	-- 0x28 UNUSED
-		x"00",	-- 0x29 UNUSED
+		x"35",	-- 0x28 SB
+		x"39",	-- 0x29 SH
 		x"00",	-- 0x2a UNUSED
 		x"3d",	-- 0x2b SW
 		x"00",	-- 0x2c UNUSED
@@ -110,10 +112,10 @@ architecture cw_generator_arch of CwGenerator is
 		x"00",	-- 0x37	UNUSED
 		x"00",	-- 0x38 UNUSED
 		x"00",	-- 0x39 UNUSED
-		x"11",	-- 0x3a SLTUI
-		x"11",	-- 0x3b SGTUI
-		x"11",	-- 0x3c SLEUI
-		x"11",	-- 0x3d SGEUI
+		x"41",	-- 0x3a SLTUI
+		x"41",	-- 0x3b SGTUI
+		x"41",	-- 0x3c SLEUI
+		x"41",	-- 0x3d SGEUI
 		x"00",	-- 0x3e UNUSED
 		x"00" 	-- 0x3f UNUSED
 	);
@@ -135,7 +137,7 @@ architecture cw_generator_arch of CwGenerator is
 		"00000000000000000000",
 		"00000000000000000000",
 		"00000000000000000000",
-		"00000000000001000000",	-- 0x11	ADDI/ADDUI/...	
+		"00000000000001100000",	-- 0x11	ADDI/...	
 		"00000000011010000000",
 		"01100000000000000000",
 		"10000000000000000000",
@@ -153,11 +155,11 @@ architecture cw_generator_arch of CwGenerator is
 		"00000000000000000000",
 		"00000000000001000000",	-- 0x21	LB
 		"00000000011110000000",
-		"01111001000000000000",
+		"01111010100000000000",
 		"10000000000000000000",
 		"00000000000001000000",	-- 0x25	LH
 		"00000000011110000000",
-		"01111010000000000000",
+		"01111001100000000000",
 		"10000000000000000000",
 		"00000000000001000000",	-- 0x29	LW
 		"00000000011110000000",
@@ -165,24 +167,28 @@ architecture cw_generator_arch of CwGenerator is
 		"10000000000000000000",
 		"00000000000001000000",	-- 0x2d	LBU
 		"00000000011110000000",
-		"01111001100000000000",
+		"01111010000000000000",
 		"10000000000000000000",
 		"00000000000001000000",	-- 0x31	LHU
 		"00000000011110000000",
-		"01111010100000000000",
+		"01111001000000000000",
 		"10000000000000000000",
 		"00000000000001000000",	-- 0x35	SB
 		"00000000010010000000",
-		"01000101000000000000",
+		"01000110000000000000",
 		"00000000000000000000",
 		"00000000000001000000",	-- 0x39	SH
 		"00000000010010000000",
-		"01000110000000000000",
+		"01000101000000000000",
 		"00000000000000000000",
 		"00000000000001000000",	-- 0x3d	SW
 		"00000000010010000000",
 		"01000100000000000000",
-		"00000000000000000000"
+		"00000000000000000000",
+		"00000000000001000000",	-- 0x41	ADDUI/...	
+		"00000000011010000000",
+		"01100000000000000000",
+		"10000000000000000000"
 	);
 	
 	signal cw1 : std_logic_vector(CWRD_SIZE-1 downto 0):=(CW_S1_LATCH=>'1', others=>'0');
@@ -201,6 +207,8 @@ architecture cw_generator_arch of CwGenerator is
 	signal relc : std_logic_vector(OPCD_SIZE+1 downto 0);
 	
 	signal calu2 : std_logic_vector(CALU_SIZE-1 downto 0);
+	
+	signal taken_flag: std_logic_vector(CWRD_SIZE-1 downto 0);
   
 begin
 	cw1 <= (CW_S1_LATCH=>'1', others=>'0');
@@ -209,12 +217,19 @@ begin
 	cw4 <= ucode_mem(upc4);
 	cw5 <= ucode_mem(upc5);
 	
+	
+	stall1 <= stall_flag(4);
+	stall2 <= stall_flag(3);
+	stall3 <= stall_flag(2);
+	stall4 <= stall_flag(1);
+	stall5 <= stall_flag(0);
 	cw_mask(CW_S1_LATCH downto 0) <= (others=> (not stall1));
 	cw_mask(CW_S2_LATCH downto CW_S1_LATCH+1) <= (others=> (not stall2));
 	cw_mask(CW_S3_LATCH downto CW_S2_LATCH+1) <= (others=> (not stall3));
 	cw_mask(CW_S4_LATCH downto CW_S3_LATCH+1) <= (others=> (not stall4));
 	cw_mask(CWRD_SIZE-1 downto CW_S4_LATCH+1) <= (others=> (not stall5));
-	cw_temp <= (cw1 or cw2 or cw3 or cw4 or cw5);
+	taken_flag <= (CW_S2_JUMP => taken, others=>'0');
+	cw_temp <= (cw1 or cw2 or cw3 or cw4 or cw5 or taken_flag);
 	cw <= cw_temp and cw_mask;
 	
 	relc <= reloc_mem(to_integer(unsigned(opcd)));

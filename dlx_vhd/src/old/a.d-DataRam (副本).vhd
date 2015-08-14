@@ -1,11 +1,11 @@
 --------------------------------------------------------------------------------
 -- FILE: DataRam
--- DESC: Data Ram, Sequencial structure. Sychronize when clk FALLING edge.
+-- DESC: Data Ram, Combinational structure
 --
 -- Author:
 -- Create: 2015-05-24
 -- Update: 2015-08-13
--- Status: UNFINISHED
+-- Status: UNTESTED
 --
 -- NOTE 1:
 -- Control Word:
@@ -35,7 +35,6 @@ entity DataRam is
 	);
 	port (
 		rst		: in std_logic;
-		clk		: in std_logic;
 		en		: in std_logic;
 		addr	: in std_logic_vector(ADDR_SIZE-1 downto 0):=(others=>'0');
 		din		: in std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
@@ -58,23 +57,21 @@ begin
 	-- In the case LOAD AFTER STORE, If control word is slower than din, then the
 	-- data area will be set to incorrect value.
 	----------------------------------------------------------------------------
-	PDR0: process(rst, clk)
+	PDR0: process(rst, addr, din, dr_cw)
 		variable addr_ph : integer := 0;
 	begin
+		addr_ph := to_integer(unsigned(addr(MyLog2Ceil(DRAM_SIZE)-1 downto 0)));
+		if addr_ph >= DRAM_SIZE then
+			addr_ph := DRAM_SIZE-4;
+		end if;
+		
 		if rst='0' then
 			for i in 0 to DRAM_SIZE-1 loop
 				data_area(i) <= (others=>'0');
 			end loop;
 			dout <= (others => '0');
 		else
---			if en='1' then			
-			if clk'event and clk='0' then
-			
-				addr_ph := to_integer(unsigned(addr(MyLog2Ceil(DRAM_SIZE)-1 downto 0)));
-				if addr_ph >= DRAM_SIZE then
-					addr_ph := DRAM_SIZE-4;
-				end if;
-
+---			if en='1' then
 				if dr_cw(3)='0' then	-- READ
 					if dr_cw(2 downto 1)="01" then	-- HALF WORD
 						dout(7 downto 0) <= data_area(addr_ph);
@@ -110,7 +107,6 @@ begin
 						data_area(addr_ph+3) <= din(31 downto 24);
 					end if;
 				end if;
-			end if;
 --			end if;
 		end if;
 	end process;

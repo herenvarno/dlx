@@ -25,9 +25,9 @@ entity Shifter is
 		l_r : in std_logic;	-- LEFT/RIGHT
 		l_a : in std_logic;	-- LOGIC/ARITHMETIC
 		s_r : in std_logic;	-- SHIFT/ROTATE
-		a : in std_logic_vector(DATA_SIZE-1 downto 0);
-		b : in std_logic_vector(DATA_SIZE-1 downto 0);
-		o : out std_logic_vector(DATA_SIZE-1 downto 0)
+		a : in std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
+		b : in std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
+		o : out std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0')
 	);
 end Shifter;
 

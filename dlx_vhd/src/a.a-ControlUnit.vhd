@@ -56,11 +56,8 @@ architecture control_unit_arch of ControlUnit is
 			rst		: in std_logic;
 			opcd	: in std_logic_vector(OPCD_SIZE-1 downto 0);
 			func	: in std_logic_vector(FUNC_SIZE-1 downto 0);
-			stall1	: in std_logic;
-			stall2	: in std_logic;
-			stall3	: in std_logic;
-			stall4	: in std_logic;
-			stall5	: in std_logic;
+			stall_flag	: in std_logic_vector(4 downto 0);
+			taken	: in std_logic;
 			cw		: out std_logic_vector(CWRD_SIZE-1 downto 0);
 			calu	: out std_logic_vector(CALU_SIZE-1 downto 0)
 		);
@@ -76,11 +73,7 @@ architecture control_unit_arch of ControlUnit is
 			s2_branch_wait	: in std_logic := '0';
 			s3_reg_a_wait	: in std_logic := '0';
 			s3_reg_b_wait	: in std_logic := '0';
-			stall1			: out std_logic := '0';
-			stall2			: out std_logic := '0';
-			stall3			: out std_logic := '1';
-			stall4			: out std_logic := '1';
-			stall5			: out std_logic := '1'
+			stall_flag		: out std_logic_vector(4 downto 0)
 		);
 	end component;
 	component Branch is
@@ -89,30 +82,29 @@ architecture control_unit_arch of ControlUnit is
 			OPCD_SIZE : integer := C_SYS_OPCD_SIZE
 		);
 		port (
+			rst		: in std_logic;
 			reg_a	: in std_logic_vector(DATA_SIZE-1 downto 0);
 			opcd	: in std_logic_vector(OPCD_SIZE-1 downto 0);
 			taken	: out std_logic := '0'
 		);
 	end component;
 	
-	signal stall1 : std_logic;
-	signal stall2 : std_logic;
-	signal stall3 : std_logic;
-	signal stall4 : std_logic;
-	signal stall5 : std_logic;
+	signal stall_flag : std_logic_vector(4 downto 0);
 	signal s2_branch_taken : std_logic;
+	signal en_branch : std_logic;
 	
 begin
 	CW_GEN: CwGenerator
 	generic map(DATA_SIZE, OPCD_SIZE, FUNC_SIZE, CWRD_SIZE, CALU_SIZE)
-	port map(clk, rst, ir(ISTR_SIZE-1 downto ISTR_SIZE-OPCD_SIZE), ir(FUNC_SIZE-1 downto 0), stall1, stall2, stall3, stall4, stall5, cw, calu);
+	port map(clk, rst, ir(ISTR_SIZE-1 downto ISTR_SIZE-OPCD_SIZE), ir(FUNC_SIZE-1 downto 0), stall_flag, s2_branch_taken, cw, calu);
 	
 	S_GEN: StallGenerator
 	generic map(CWRD_SIZE)
-	port map(rst, clk, s2_branch_taken, s2_branch_wait, s3_reg_a_wait, s3_reg_b_wait, stall1, stall2, stall3, stall4, stall5);
+	port map(rst, clk, s2_branch_taken, s2_branch_wait, s3_reg_a_wait, s3_reg_b_wait, stall_flag);
 	
+--	en_branch <= stall_flag(4);
 	BR	: Branch
 	generic map(DATA_SIZE, OPCD_SIZE)
-	port map(reg_a, ir(ISTR_SIZE-1 downto ISTR_SIZE-OPCD_SIZE), s2_branch_taken);
+	port map('0', reg_a, ir(ISTR_SIZE-1 downto ISTR_SIZE-OPCD_SIZE), s2_branch_taken);
 	
 end control_unit_arch;

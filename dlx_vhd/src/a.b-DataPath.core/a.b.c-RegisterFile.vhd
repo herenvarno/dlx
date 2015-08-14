@@ -30,13 +30,13 @@ entity RegisterFile is
 		rd2_en	: in std_logic;											-- read port 2
 		wr_en	: in std_logic;											-- write port
 		link_en	: in std_logic;											-- save link reg
-		rd1_addr: in std_logic_vector(MyLog2Ceil(REG_NUM)-1 downto 0);	-- address of read port 1
-		rd2_addr: in std_logic_vector(MyLog2Ceil(REG_NUM)-1 downto 0);	-- address of read port 2
-		wr_addr	: in std_logic_vector(MyLog2Ceil(REG_NUM)-1 downto 0);	-- address of write port
-		d_out1	: out std_logic_vector(DATA_SIZE-1 downto 0);			-- data out 1 bus
-		d_out2	: out std_logic_vector(DATA_SIZE-1 downto 0);			-- data out 2 bus
-		d_in	: in std_logic_vector(DATA_SIZE-1 downto 0);			-- data in bus
-		d_link	: in std_logic_vector(DATA_SIZE-1 downto 0)				-- link register input bus
+		rd1_addr: in std_logic_vector(MyLog2Ceil(REG_NUM)-1 downto 0):=(others=>'0');	-- address of read port 1
+		rd2_addr: in std_logic_vector(MyLog2Ceil(REG_NUM)-1 downto 0):=(others=>'0');	-- address of read port 2
+		wr_addr	: in std_logic_vector(MyLog2Ceil(REG_NUM)-1 downto 0):=(others=>'0');	-- address of write port
+		d_out1	: out std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');			-- data out 1 bus
+		d_out2	: out std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');			-- data out 2 bus
+		d_in	: in std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');			-- data in bus
+		d_link	: in std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0')				-- link register input bus
 	);
 end RegisterFile;
 

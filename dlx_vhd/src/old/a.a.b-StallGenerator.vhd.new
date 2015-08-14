@@ -1,0 +1,83 @@
+--------------------------------------------------------------------------------
+-- FILE: StallGenerator
+-- DESC: Generate stall for each stage
+--
+-- Author:
+-- Create: 2015-07-29
+-- Update: 2015-07-29
+-- Status: UNFINISHED
+--------------------------------------------------------------------------------
+
+library ieee;
+use ieee.std_logic_1164.all;
+use work.Consts.all;
+
+--------------------------------------------------------------------------------
+-- ENTITY
+--------------------------------------------------------------------------------
+entity StallGenerator is
+	generic(
+		CWRD_SIZE : integer := C_SYS_CWRD_SIZE
+	);
+	port(
+		rst				: in std_logic;
+		clk				: in std_logic;
+		s2_branch_taken	: in std_logic := '0';
+		s2_branch_wait	: in std_logic := '0';
+		s3_reg_a_wait	: in std_logic := '0';
+		s3_reg_b_wait	: in std_logic := '0';
+		stall_flag		: out std_logic_vector(4 downto 0)
+	);
+end StallGenerator;
+
+--------------------------------------------------------------------------------
+-- ARCHITECTURE
+--------------------------------------------------------------------------------
+architecture stall_generator_arch of StallGenerator is
+	
+begin
+	-- NEXT STATE GENERATOR
+	P_NSG: process(s2_branch_taken, s2_branch_wait, s3_reg_a_wait, s3_reg_b_wait)
+		variable c_state, n_state : integer := SG_ST11111;
+	begin
+		n_state := to_integer(unsigned(conv_std_logic_vector(c_state) sll 1));
+		
+		if c_state = SG_ST00011 then
+			n_state := SG_ST00100;
+		end if;
+		if c_state = SG_ST00111 then
+			n_state := SG_ST01000;
+		end if;
+		if c_state = SG_ST01111 then
+			n_state := SG_ST10000;
+		end if;
+		
+		if (c_state < SG_ST001000) and (s3_reg_a_wait or s3_reg_b_wait) then
+			n_state := SG_ST00111;
+		end if;
+		if (c_state < SG_ST000100) and (s2_branch_wait) then
+			n_state := SG_ST00011;
+		end if;
+		if (c_state < SG_ST00010) and (s2_branch_take) then
+			n_state := SG_ST00001;
+		end if;
+	end process;
+	
+	-- OUTPUT GENERATOR
+	P_OUT: process(c_state)
+	begin
+		stall_flag <= conv_std_logic_vector(unsigned(c_state));
+	end process;
+
+	-- NEXT STATE REGISTER
+	P_REG: process(rst, clk)
+	begin
+		if rst='0' then
+			c_state := SG_ST11111;
+		else
+			if rising_edge(clk) then
+				c_state := n_state;
+			end if;
+		end if;
+	end process;
+end stall_generator_arch;

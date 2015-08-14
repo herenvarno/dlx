@@ -26,28 +26,28 @@ package Consts is
 	constant C_REG_GLOBAL_NUM	: integer	:= 8;			-- Number of Global register in register file
 	constant C_REG_GENERAL_NUM	: integer	:= 8;			-- Number of General registers (I/L/O) in register file
 	constant C_REG_WINDOW_NUM	: integer	:= 8;			-- Number of Windows in register file
-	constant C_RAM_IRAM_SIZE	: integer	:= 1024;		-- IRAM size
-	constant C_RAM_DRAM_SIZE	: integer	:= 1024;		-- DRAM size
+	constant C_RAM_IRAM_SIZE	: integer	:= 10240;		-- IRAM size
+	constant C_RAM_DRAM_SIZE	: integer	:= 10240;		-- DRAM size
 	
 	-- ALU Operations
-	constant OP_ADD		: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "00000";
-	constant OP_AND		: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "00001";
-	constant OP_OR		: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "00010";
-	constant OP_XOR		: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "00011";
-	constant OP_SLL		: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "00100";
-	constant OP_SRL		: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "00101";
-	constant OP_SRA		: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "00111";
-	constant OP_SUB		: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "10000";
-	constant OP_SGT		: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "10001";
-	constant OP_SGE		: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "10010";
-	constant OP_SLT		: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "10011";
-	constant OP_SLE		: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "10100";
-	constant OP_SGTU	: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "10101";
-	constant OP_SGEU	: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "10110";
-	constant OP_SLTU	: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "10111";
-	constant OP_SLEU	: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "11000";
-	constant OP_SEQ		: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "11001";
-	constant OP_SNE		: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "11010";
+	constant OP_ADD		: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "00000";	--0x00
+	constant OP_AND		: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "00001";	--0x01
+	constant OP_OR		: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "00010";	--0x02
+	constant OP_XOR		: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "00011";	--0x03
+	constant OP_SLL		: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "00100";	--0x04
+	constant OP_SRL		: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "00101";	--0x05
+	constant OP_SRA		: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "00111";	--0x07
+	constant OP_SUB		: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "10000";	--0x10
+	constant OP_SGT		: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "10001";	--0x11
+	constant OP_SGE		: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "10010";	--0x12
+	constant OP_SLT		: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "10011";	--0x13
+	constant OP_SLE		: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "10100";	--0x14
+	constant OP_SGTU	: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "10101";	--0x15
+	constant OP_SGEU	: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "10110";	--0x16
+	constant OP_SLTU	: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "10111";	--0x17
+	constant OP_SLEU	: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "11000";	--0x18
+	constant OP_SEQ		: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "11001";	--0x19
+	constant OP_SNE		: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "11010";	--0x1a
 	
 	-- Control Word
 	constant CW_S1_LATCH	: integer := 0;
@@ -84,6 +84,7 @@ package Consts is
 	constant OPCD_ANDI	: std_logic_vector(C_SYS_OPCD_SIZE-1 downto 0) := "001100";	--0x0c
 	constant OPCD_ORI	: std_logic_vector(C_SYS_OPCD_SIZE-1 downto 0) := "001101";	--0x0d
 	constant OPCD_XORI	: std_logic_vector(C_SYS_OPCD_SIZE-1 downto 0) := "001110";	--0x0e
+	constant OPCD_LHI	: std_logic_vector(C_SYS_OPCD_SIZE-1 downto 0) := "001110";	--0x0f
 	constant OPCD_JR	: std_logic_vector(C_SYS_OPCD_SIZE-1 downto 0) := "010010";	--0x12
 	constant OPCD_JALR	: std_logic_vector(C_SYS_OPCD_SIZE-1 downto 0) := "010011";	--0x13
 	constant OPCD_SLLI	: std_logic_vector(C_SYS_OPCD_SIZE-1 downto 0) := "010100";	--0x14
@@ -130,5 +131,47 @@ package Consts is
 	constant FUNC_SGTU	: std_logic_vector(C_SYS_FUNC_SIZE-1 downto 0) := "00000111011";	--0x3b
 	constant FUNC_SLEU	: std_logic_vector(C_SYS_FUNC_SIZE-1 downto 0) := "00000111100";	--0x3c
 	constant FUNC_SGEU	: std_logic_vector(C_SYS_FUNC_SIZE-1 downto 0) := "00000111101";	--0x3d
+	
+	-- STALL GENERATOR STATES
+	constant SG_ST00000	: integer := 0;		-- STALL NONE
+	constant SG_ST00001	: integer := 1;		-- STALL STAGE 1
+	constant SG_ST00010	: integer := 2;		-- STALL STAGE 2
+	constant SG_ST00011	: integer := 3;		-- STALL STAGE 1,2
+	constant SG_ST00100	: integer := 4;		-- STALL STAGE 3
+	constant SG_ST00101	: integer := 5;		-- STALL STAGE 1,3
+	constant SG_ST00110	: integer := 6;		-- STALL STAGE 2,3
+	constant SG_ST00111	: integer := 7;		-- STALL STAGE 1,2,3
+	constant SG_ST01000	: integer := 8;		-- STALL STAGE 4
+	constant SG_ST01001	: integer := 9;		-- STALL STAGE 1,4
+	constant SG_ST01010	: integer := 10;	-- STALL STAGE 2,4
+	constant SG_ST01011	: integer := 11;	-- STALL STAGE 1,2,4
+	constant SG_ST01100	: integer := 12;	-- STALL STAGE 3,4
+	constant SG_ST01101	: integer := 13;	-- STALL STAGE 1,3,4
+	constant SG_ST01110	: integer := 14;	-- STALL STAGE 2,3,4
+	constant SG_ST01111	: integer := 15;	-- STALL STAGE 1,2,3,4
+	constant SG_ST10000	: integer := 16;	-- STALL STAGE 5
+	constant SG_ST10001	: integer := 17;	-- STALL STAGE 1,5
+	constant SG_ST10010	: integer := 18;	-- STALL STAGE 2,5
+	constant SG_ST10011	: integer := 19;	-- STALL STAGE 1,2,5
+	constant SG_ST10100	: integer := 20;	-- STALL STAGE 3,5
+	constant SG_ST10101	: integer := 21;	-- STALL STAGE 1,3,5
+	constant SG_ST10110	: integer := 22;	-- STALL STAGE 2,3,5
+	constant SG_ST10111	: integer := 23;	-- STALL STAGE 1,2,3,5
+	constant SG_ST11000	: integer := 24;	-- STALL STAGE 4,5
+	constant SG_ST11001	: integer := 25;	-- STALL STAGE 1,4,5
+	constant SG_ST11010	: integer := 26;	-- STALL STAGE 2,4,5
+	constant SG_ST11011	: integer := 27;	-- STALL STAGE 1,2,4,5
+	constant SG_ST11100	: integer := 28;	-- STALL STAGE 3,4,5
+	constant SG_ST11101	: integer := 29;	-- STALL STAGE 1,3,4,5
+	constant SG_ST11110	: integer := 30;	-- STALL STAGE 2,3,4,5
+	constant SG_ST11111	: integer := 31;	-- STALL STAGE 1,2,3,4,5
+	
+	constant SG_ST0		: integer := 0;
+	constant SG_ST1		: integer := 1;
+	constant SG_ST2		: integer := 2;
+	constant SG_ST3		: integer := 3;
+	constant SG_ST4		: integer := 4;
+	constant SG_ST5		: integer := 5;
+	
 	
 end package Consts;
