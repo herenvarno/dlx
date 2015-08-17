@@ -21,9 +21,9 @@
 -- 00101 -- [SRL] Logic Shift RIGHT
 -- 00110 -- NOT USED
 -- 00111 -- [SRA] Arithmetic Shift RIGHT
--- 01000 -- NOT USED
+-- 01000 -- [MULT] 	Multiply -- IN MUL MODULE
 -- 01001 -- NOT USED
--- 01010 -- NOT USED
+-- 01010 -- [DIV] Division -- IN DIV MODULE
 -- 01011 -- NOT USED
 -- 01100 -- NOT USED
 -- 01101 -- NOT USED

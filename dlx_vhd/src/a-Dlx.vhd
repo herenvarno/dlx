@@ -40,9 +40,13 @@ architecture dlx_arch of Dlx is
 			rst		: in  std_logic;
 			ir		: in std_logic_vector(ISTR_SIZE-1 downto 0):=(others=>'0');
 			reg_a	: in std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
-			s2_branch_wait	: in std_logic;
-			s3_reg_a_wait	: in std_logic;
-			s3_reg_b_wait	: in std_logic;
+			ld_a	: in std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
+	  		sig_bal	: in std_logic:='0';
+	  		sig_bpw	: out std_logic:='0';
+	  		sig_jral: in std_logic:='0';
+			sig_ral	: in std_logic;
+			sig_mul	: in std_logic;
+			sig_div	: in std_logic;
 			cw		: out std_logic_vector(CWRD_SIZE-1 downto 0);
 			calu	: out std_logic_vector(CALU_SIZE-1 downto 0)
 		);
@@ -96,17 +100,21 @@ architecture dlx_arch of Dlx is
 	  		rst			: in std_logic;
 	  		istr_addr	: out std_logic_vector(ADDR_SIZE-1 downto 0);
 	  		istr_val	: in std_logic_vector(ISTR_SIZE-1 downto 0):=(others=>'0');
-	  		ir_out		: out std_logic_vector(ISTR_SIZE-1 downto 0);
-	  		reg_a_out	: out std_logic_vector(DATA_SIZE-1 downto 0);
-	  		data_addr	: out std_logic_vector(ADDR_SIZE-1 downto 0);
+	  		ir_out		: out std_logic_vector(ISTR_SIZE-1 downto 0):=(others=>'0');
+	  		reg_a_out	: out std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
+	  		ld_a_out	: out std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
+	  		data_addr	: out std_logic_vector(ADDR_SIZE-1 downto 0):=(others=>'0');
 	  		data_i_val	: in std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
-	  		data_o_val	: out std_logic_vector(DATA_SIZE-1 downto 0);
+	  		data_o_val	: out std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
 	  		cw			: in std_logic_vector(CWRD_SIZE-1 downto 0):=(others=>'0');
-	  		dr_cw		: out std_logic_vector(DRCW_SIZE-1 downto 0);
+	  		dr_cw		: out std_logic_vector(DRCW_SIZE-1 downto 0):=(others=>'0');
 	  		calu		: in std_logic_vector(CALU_SIZE-1 downto 0):=(others=>'0');
-	  		branch_wait	: out std_logic:='0';
-  			reg_a_wait	: out std_logic:='0';
-  			reg_b_wait	: out std_logic:='0'
+	  		sig_bal		: out std_logic:='0';
+	  		sig_bpw		: in std_logic:='0';
+	  		sig_jral	: out std_logic:='0';
+	  		sig_ral		: out std_logic:='0';
+	  		sig_mul		: out std_logic:='0';
+	  		sig_div		: out std_logic:='0'
 	  	);
 	end component;
 
@@ -132,14 +140,18 @@ architecture dlx_arch of Dlx is
 	signal dr_cw	: std_logic_vector(DRCW_SIZE-1 downto 0);
 	signal calu		: std_logic_vector(CALU_SIZE-1 downto 0);
 	signal reg_a_val: std_logic_vector(DATA_SIZE-1 downto 0);
-	signal branch_wait:std_logic;
-	signal reg_a_wait:std_logic;
-	signal reg_b_wait:std_logic;
+	signal ld_a_val	: std_logic_vector(DATA_SIZE-1 downto 0);
+	signal sig_bal	: std_logic:='0';
+	signal sig_bpw	: std_logic:='0';
+	signal sig_jral	: std_logic:='0';
+	signal sig_ral	: std_logic:='0';
+	signal sig_mul	: std_logic:='0';
+	signal sig_div	: std_logic:='0';
 	
 begin
 	CU0: ControlUnit
 	generic map(ISTR_SIZE, DATA_SIZE, OPCD_SIZE, FUNC_SIZE, CWRD_SIZE, CALU_SIZE)
-	port map(clk, rst, ir, reg_a_val, branch_wait, reg_a_wait, reg_b_wait,cw, calu);
+	port map(clk, rst, ir, reg_a_val, ld_a_val, sig_bal, sig_bpw, sig_jral, sig_ral, sig_mul, sig_div, cw, calu);
 	
 	IR0: InstructionRam
 	generic map(ADDR_SIZE, ISTR_SIZE)
@@ -151,6 +163,6 @@ begin
 	
 	DP0: DataPath
 	generic map(ADDR_SIZE, DATA_SIZE, ISTR_SIZE, OPCD_SIZE, IMME_SIZE, CWRD_SIZE, CALU_SIZE, DRCW_SIZE)
-	port map(clk, rst, pc_bus, ir_bus, ir, reg_a_val, addr_bus, do_bus, di_bus, cw, dr_cw, calu, branch_wait, reg_a_wait, reg_b_wait);
+	port map(clk, rst, pc_bus, ir_bus, ir, reg_a_val, ld_a_val, addr_bus, do_bus, di_bus, cw, dr_cw, calu, sig_bal, sig_bpw, sig_jral, sig_ral, sig_mul, sig_div);
 	
 end dlx_arch;

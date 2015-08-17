@@ -31,9 +31,13 @@ entity ControlUnit is
 		rst		: in  std_logic;
 		ir		: in std_logic_vector(ISTR_SIZE-1 downto 0):=(others=>'0');
 		reg_a	: in std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
-		s2_branch_wait	: in std_logic;
-		s3_reg_a_wait	: in std_logic;
-		s3_reg_b_wait	: in std_logic;
+		ld_a	: in std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
+	  	sig_bal	: in std_logic:='0';
+	  	sig_bpw	: out std_logic:='0';
+	  	sig_jral: in std_logic:='0';
+		sig_ral	: in std_logic;
+		sig_mul	: in std_logic;
+		sig_div	: in std_logic;
 		cw		: out std_logic_vector(CWRD_SIZE-1 downto 0);
 		calu	: out std_logic_vector(CALU_SIZE-1 downto 0)
 	);
@@ -69,11 +73,12 @@ architecture control_unit_arch of ControlUnit is
 		port(
 			rst				: in std_logic;
 			clk				: in std_logic;
-			s2_branch_taken	: in std_logic := '0';
-			s2_branch_wait	: in std_logic := '0';
-			s3_reg_a_wait	: in std_logic := '0';
-			s3_reg_b_wait	: in std_logic := '0';
-			stall_flag		: out std_logic_vector(4 downto 0)
+			sig_ral			: in std_logic := '0';		-- from DataPath
+			sig_bpw			: in std_logic := '0';		-- from Branch
+			sig_jral		: in std_logic := '0';		-- from DataPath
+			sig_mul			: in std_logic := '0';		-- from CwGenerator
+			sig_div			: in std_logic := '0';		-- from CwGenerator
+			stall_flag		: out std_logic_vector(4 downto 0):=(others=>'0')
 		);
 	end component;
 	component Branch is
@@ -83,28 +88,34 @@ architecture control_unit_arch of ControlUnit is
 		);
 		port (
 			rst		: in std_logic;
+			clk		: in std_logic;
 			reg_a	: in std_logic_vector(DATA_SIZE-1 downto 0);
+			ld_a	: in std_logic_vector(DATA_SIZE-1 downto 0);
 			opcd	: in std_logic_vector(OPCD_SIZE-1 downto 0);
-			taken	: out std_logic := '0'
+			sig_bal	: in std_logic:='0';
+	  		sig_bpw	: out std_logic :='0';
+			sig_brt	: out std_logic :='0'
 		);
 	end component;
 	
 	signal stall_flag : std_logic_vector(4 downto 0);
-	signal s2_branch_taken : std_logic;
+	signal sig_brt : std_logic;
 	signal en_branch : std_logic;
+	signal sig_bpw_tmp: std_logic;
 	
 begin
 	CW_GEN: CwGenerator
 	generic map(DATA_SIZE, OPCD_SIZE, FUNC_SIZE, CWRD_SIZE, CALU_SIZE)
-	port map(clk, rst, ir(ISTR_SIZE-1 downto ISTR_SIZE-OPCD_SIZE), ir(FUNC_SIZE-1 downto 0), stall_flag, s2_branch_taken, cw, calu);
+	port map(clk, rst, ir(ISTR_SIZE-1 downto ISTR_SIZE-OPCD_SIZE), ir(FUNC_SIZE-1 downto 0), stall_flag, sig_brt, cw, calu);
 	
 	S_GEN: StallGenerator
 	generic map(CWRD_SIZE)
-	port map(rst, clk, s2_branch_taken, s2_branch_wait, s3_reg_a_wait, s3_reg_b_wait, stall_flag);
+	port map(rst, clk, sig_ral, sig_bpw_tmp, sig_jral, sig_mul, sig_div, stall_flag);
 	
---	en_branch <= stall_flag(4);
 	BR	: Branch
 	generic map(DATA_SIZE, OPCD_SIZE)
-	port map('0', reg_a, ir(ISTR_SIZE-1 downto ISTR_SIZE-OPCD_SIZE), s2_branch_taken);
+	port map(rst, clk, reg_a, ld_a, ir(ISTR_SIZE-1 downto ISTR_SIZE-OPCD_SIZE), sig_bal, sig_bpw_tmp, sig_brt);
+	
+	sig_bpw <= sig_bpw_tmp;
 	
 end control_unit_arch;

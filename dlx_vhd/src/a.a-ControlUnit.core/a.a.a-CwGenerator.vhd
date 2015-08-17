@@ -55,7 +55,7 @@ architecture cw_generator_arch of CwGenerator is
 	signal stall5 : std_logic;
 	signal reloc_mem : reloc_mem_t := (
 		x"01",	-- 0x00 R
-		x"00",	-- 0x01 UNUSED 
+		x"01",	-- 0x01 F
 		x"05",	-- 0x02 J
 		x"09",	-- 0x03 JAL
 		x"0d",	-- 0x04 BEQZ
@@ -276,6 +276,12 @@ begin
 				calu2 <= OP_SNE;
 			else
 				calu2 <= OP_ADD;
+			end if;
+		elsif (opcd=OPCD_F) then
+			if (func=FUNC_MULT) then						-- MULT
+				calu2 <= OP_MULT;
+			elsif (func=FUNC_DIV) then						-- DIV
+				calu2 <= OP_DIV;
 			end if;
 		elsif (opcd=OPCD_ADDI) or (opcd=OPCD_ADDUI) then	-- ADD
 			calu2 <= OP_ADD;

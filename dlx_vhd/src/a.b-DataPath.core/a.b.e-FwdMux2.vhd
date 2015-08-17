@@ -59,7 +59,7 @@ begin
 						dmatchf := '1';
 					end if;
 					output <= reg_f;
-				elsif addr_c=addr_ff and (valid_ff='1') then
+				elsif (addr_c=addr_ff) and (valid_ff='1') then
 					if dirty_ff='1' then
 						dmatchff := '1';
 					end if;
