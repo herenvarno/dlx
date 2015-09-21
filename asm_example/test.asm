@@ -1,19 +1,33 @@
-addi r1, r0, 100
-xor r2, r2, r2
+# software div
+addi r1, r0, 88
+addi r2, r0, 9
+xor r3, r3, r3
+divide:
+	slt r5, r1, r2
+	bnez r5, finish
+	sub r1, r1, r2
+	addi r3, r3, 1
+	j divide
+finish:
+add r4, r0, r1
+nop
 
-ciclo:
-lw r3, 0(r2)
-addi r3, r3, 10
-sw 100(r2), r3
-subi r1, r1, 1
-addi r2, r2, 4
-sw 1(r0), r1
-lw r5, 1(r0)
-bnez r5, ciclo
+# hardware div with RAL hazard
+addi r5, r0, 4
+addi r7, r0, 88
+sw 0(r0), r7
+addi r1, r0, 9
+xor r3, r3, r3
+lw r6, 0(r0)
+div r3, r6, r1
+div r4, r3, r5
+nop
+nop
 
-addi r4, r0, 65535 
-ori r5, r4, 100000
-add r6, r4, r5
+addui r1, r0, 65535
+lhi r1, 65535
+addui r2, r0, 1
+div r3, r1, r2
 
-end:
-j end
+NOOP:
+j NOOP

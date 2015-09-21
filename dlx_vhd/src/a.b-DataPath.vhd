@@ -4,8 +4,8 @@
 --
 -- Author:
 -- Create: 2015-05-24
--- Update: 2015-07-18
--- Status: UNFINISHED
+-- Update: 2015-09-20
+-- Status: TESTED
 --------------------------------------------------------------------------------
 
 library ieee;
@@ -34,6 +34,7 @@ entity DataPath is
   		istr_addr	: out std_logic_vector(ADDR_SIZE-1 downto 0);
   		istr_val	: in std_logic_vector(ISTR_SIZE-1 downto 0):=(others=>'0');
   		ir_out		: out std_logic_vector(ISTR_SIZE-1 downto 0):=(others=>'0');
+  		pc_out		: out std_logic_vector(ADDR_SIZE-1 downto 0):=(others=>'0');
   		reg_a_out	: out std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
   		ld_a_out	: out std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
   		data_addr	: out std_logic_vector(ADDR_SIZE-1 downto 0):=(others=>'0');
@@ -148,12 +149,29 @@ architecture data_path_arch of DataPath is
 		port (
 			rst: in std_logic;
 			clk: in std_logic;
+			en: in std_logic;
+			lock: in std_logic;
 			a : in std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');	-- Data A
 			b : in std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');	-- Data B
 			o : out std_logic_vector(DATA_SIZE*2-1 downto 0):=(others=>'0')	-- Data Out
 		);
 	end component;
-	
+	component Div is
+		generic (
+			DATA_SIZE	: integer := C_SYS_DATA_SIZE;
+			STAGE		: integer := C_DIV_STAGE
+		);
+		port (
+			rst: in std_logic;
+			clk: in std_logic;
+			en: in std_logic:='0';
+			lock: in std_logic:='0';
+			a : in std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');	-- Data A
+			b : in std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');	-- Data B
+			o : out std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0')	-- Data Out
+		);
+	end component;
+
 	component Extender is
 		generic(
 			SRC_SIZE : integer := 1;
@@ -208,6 +226,7 @@ architecture data_path_arch of DataPath is
 	constant REG_NUM : integer := C_REG_NUM;
 	constant REG_ADDR_SIZE : integer := MyLog2Ceil(REG_NUM);
 	constant MUL_STAGE : integer := C_MUL_STAGE;
+	constant DIV_STAGE : integer := C_MUL_STAGE;
 	
 	-- Program Counters
 	signal s1_pc, s2_pc, s1_jpc, s2_jpc, s1_npc, s2_npc, s2_fpc: std_logic_vector(ADDR_SIZE-1 downto 0):= (others=>'0');
@@ -225,18 +244,19 @@ architecture data_path_arch of DataPath is
 	signal s2_a, s2_b, s3_a, s3_b, s4_a, s4_b : std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
 	signal s2_imm_i : std_logic_vector(IMME_SIZE-1 downto 0):=(others=>'0');
 	signal s2_imm_j : std_logic_vector(ISTR_SIZE-OPCD_SIZE-1 downto 0):=(others=>'0');
-	signal s2_imm_i_ext, s2_imm_j_ext, s3_imm_i_ext : std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
+	signal s2_imm_l_ext, s2_imm_h_ext, s2_imm_j_ext, s2_imm_i_ext, s3_imm_i_ext : std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
 	signal s3_fwd_valid : std_logic;
 	signal s3_a_keep, s3_b_keep, s3_a_sel, s3_b_fwd, s3_b_sel, s4_b_fwd : std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
 	signal s3_mul_op, s3_div_op : std_logic:='0';
 	signal s3_exe_sel : std_logic_vector(1 downto 0):= "00";
-	signal s3_alu_out, s3_mul_out, s3_exe_out, s4_exe_out : std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
+	signal s3_alu_out, s3_mul_out, s3_div_out, s3_exe_out, s4_exe_out : std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
+	signal s3_mul_lock, s3_div_lock:std_logic:='0';
 	signal s4_mem_in, s4_mem_out : std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
 	signal s4_result, s5_result : std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
 	signal s3_reg_a_wait, s3_reg_b_wait: std_logic:='0';
 	
 	signal s2_jump_addr_imm, s2_jump_addr_rel, s2_jump_addr_reg:std_logic_vector(ADDR_SIZE-1 downto 0):=(others=>'0');
-	signal s2_branch_flag, s2_jr_flag, s2_j_flag, s2_jump_flag, s3_rd_flag: std_logic;
+	signal s2_branch_flag, s2_jr_flag, s2_j_flag, s2_jump_flag, s3_jump_flag: std_logic;
 	signal s2_a_f_b_en, s2_a_ff_b_en, s2_a_f_j_en, s2_a_ff_j_en: std_logic;
 	
 	signal s4_reg_a_wait, s4_reg_b_wait: std_logic:='0';
@@ -275,6 +295,7 @@ begin
 	
 	-- PIPELINE STAGE 2: [ID]
 	ir_out <= s2_istr;	-- to Control Unit
+	pc_out <= s2_pc;
 	
 	s2_rd1_addr <= s2_istr(ISTR_SIZE-OPCD_SIZE-1 downto ISTR_SIZE-OPCD_SIZE-REG_ADDR_SIZE);
 	s2_rd2_addr <= s2_istr(ISTR_SIZE-OPCD_SIZE-REG_ADDR_SIZE-1 downto ISTR_SIZE-OPCD_SIZE-2*REG_ADDR_SIZE);
@@ -322,17 +343,33 @@ begin
 	
 	----------------------------------------------------------------------------
 	-- NOTE:
-	-- This 2 extenders are used to extend variable/address. The I-EXTENDER extends
+	-- This 3 extenders are used to extend variable/address. The L-EXTENDER extends
 	-- immediate variable as well as relative address in either signed or unsigned
-	-- mode; While the J-EXTENDER deal with the absolute address in unsigned mode.
+	-- mode; While the J-EXTENDER deal with the 26-bit relative address in signed mode.
+	-- The H-EXTENDER extends 16-bit variable with 0s in lower side.(ONLY FOR LHI)
 	----------------------------------------------------------------------------
-	EXT_I: Extender
+	EXT_L: Extender
 	generic map(IMME_SIZE, DATA_SIZE)
-	port map(cw(CW_S2_EXT_S), s2_imm_i, s2_imm_i_ext);
+	port map(cw(CW_S2_EXT_S), s2_imm_i, s2_imm_l_ext);
 	
 	EXT_J: Extender
 	generic map(ISTR_SIZE-OPCD_SIZE, ADDR_SIZE)
 	port map('1', s2_imm_j, s2_imm_j_ext);
+	
+	EXT_H: process(s2_imm_i)
+	begin
+		s2_imm_h_ext(DATA_SIZE-1 downto DATA_SIZE/2) <= s2_imm_i;
+		s2_imm_h_ext(DATA_SIZE/2-1 downto 0) <= (others=>'0');
+	end process;
+	
+	EXT_I: process(s2_imm_l_ext, s2_imm_h_ext, s2_istr)
+	begin
+		if s2_istr(ISTR_SIZE-1 downto ISTR_SIZE-OPCD_SIZE)=OPCD_LHI then
+			s2_imm_i_ext <= s2_imm_h_ext;
+		else
+			s2_imm_i_ext <= s2_imm_l_ext;
+		end if;
+	end process;
 	
 	----------------------------------------------------------------------------
 	-- NOTE:
@@ -361,7 +398,7 @@ begin
 	generic map (ADDR_SIZE)
 	port map (cw(CW_S2_SEL_JA_1), s2_jump_addr_rel, s2_jump_addr_reg, s2_jump_test);
 	
-	PROG: process(s2_istr)
+	PROG: process(s2_istr, s2_branch_flag,s2_jr_flag,s2_j_flag)
 	begin
 		if (s2_istr(ISTR_SIZE-1 downto ISTR_SIZE-OPCD_SIZE)=OPCD_BEQZ) or (s2_istr(ISTR_SIZE-1 downto ISTR_SIZE-OPCD_SIZE)=OPCD_BNEZ) then
 			s2_branch_flag <= '1';
@@ -424,8 +461,8 @@ begin
 	
 	PROCJUMPFLAG: process(clk)
 	begin
-		if rising_edge(clk) then
-			s3_rd_flag <= not s2_jump_flag;
+		if rising_edge(clk) and cw(CW_S2_LATCH)='1' then
+			s3_jump_flag <= s2_jump_flag;
 		end if;
 	end process;
 	
@@ -438,21 +475,38 @@ begin
 	generic map(DATA_SIZE)
 	port map(s4_reg_a_wait, s3_b, s4_b, s3_b_keep);
 	
-	s3_a_sel_f_en <= cw(CW_S4_WB_FLAG) and (not s2_jump_flag);
-	s3_a_sel_ff_en <= cw(CW_S4_WB_FLAG) and (not s2_jump_flag);
+	----------------------------------------------------------------------------
+	-- NOTE:
+	-- When stage 3 is JUMP/BRANCH instruction, no need to forward, because JUMP/BRANCH
+	-- instructions have nothing to do in stage 3,4 and 5.
+	----------------------------------------------------------------------------	
+	s3_a_sel_f_en <= cw(CW_S4_WB_FLAG) and (not s3_jump_flag);
+	s3_a_sel_ff_en <= cw(CW_S5_EN_WB) and (not s3_jump_flag);
 	FWDMUX_A: FwdMux2
 	generic map(DATA_SIZE, REG_ADDR_SIZE)
 	port map(s3_a_keep, s4_exe_out, s5_result, s3_rd1_addr, s4_wr_addr, s5_wr_addr, s3_a_sel_f_en, s3_a_sel_ff_en, cw(CW_S4_LD_FLAG), '0', '1', s3_a_sel, s3_reg_a_wait, open);
 	
-	s3_b_sel_f_en <= cw(CW_S4_WB_FLAG) and (not cw(CW_S3_SEL_B)) and (not s2_jump_flag);
-	s3_b_sel_ff_en <= cw(CW_S5_EN_WB) and (not cw(CW_S3_SEL_B)) and (not s2_jump_flag);
+	s3_b_sel_f_en <= cw(CW_S4_WB_FLAG) and (not cw(CW_S3_SEL_B)) and (not s3_jump_flag);
+	s3_b_sel_ff_en <= cw(CW_S5_EN_WB) and (not cw(CW_S3_SEL_B)) and (not s3_jump_flag);
 	FWDMUX_B: FwdMux2
 	generic map(DATA_SIZE, REG_ADDR_SIZE)
 	port map(s3_b_keep, s4_exe_out, s5_result, s3_rd2_addr, s4_wr_addr, s5_wr_addr, s3_b_sel_f_en, s3_b_sel_ff_en, cw(CW_S4_LD_FLAG), '0', '1', s3_b_fwd, s3_reg_b_wait, open);
+	
+	----------------------------------------------------------------------------
+	-- FIXME
+	-- New method: use RAL signal produced in stage 2 to trigger RAL stall. So the
+	-- code below is not needed.
+	----------------------------------------------------------------------------
 	PW: process(s3_reg_a_wait, s3_reg_b_wait)
 	begin
 		sig_ral<=(s3_reg_a_wait or s3_reg_b_wait);
 	end process;
+	
+	----------------------------------------------------------------------------
+	-- UPDATE
+	-- New method: use RAL signal produced in stage 2 to trigger RAL stall
+	----------------------------------------------------------------------------
+	--sig_ral <= s3_ral_detect;
 
 	MUXB: Mux
 	generic map(DATA_SIZE)
@@ -464,16 +518,24 @@ begin
 	
 	MUL0: Mul
 	generic map(DATA_SIZE/2, MUL_STAGE)
-	port map(rst, clk, s3_a_sel(DATA_SIZE/2-1 downto 0), s3_b_sel(DATA_SIZE/2-1 downto 0), s3_mul_out);
+	port map(rst, clk, s3_mul_op, s3_mul_lock, s3_a_sel(DATA_SIZE/2-1 downto 0), s3_b_sel(DATA_SIZE/2-1 downto 0), s3_mul_out);
+	
+	DIV0: Div
+	generic map(DATA_SIZE, DIV_STAGE)
+	port map(rst, clk, s3_div_op, s3_div_lock, s3_a_sel, s3_b_sel, s3_div_out);
 	
 	s3_mul_op <= '1' when calu="01000" else '0';
 	sig_mul <= s3_mul_op;
 	s3_div_op <= '1' when calu="01010" else '0';
 	sig_div <= s3_div_op;
 	s3_exe_sel <= s3_div_op & s3_mul_op;
+	
+	
+	s3_div_lock <= (s3_reg_a_wait or s3_reg_b_wait);
+	s3_mul_lock <= (s3_reg_a_wait or s3_reg_b_wait);
 	MUXEXE: Mux4
 	generic map(DATA_SIZE)
-	port map(s3_exe_sel, s3_alu_out, s3_mul_out, (others=>'0'), (others=>'0'), s3_exe_out);
+	port map(s3_exe_sel, s3_alu_out, s3_mul_out, s3_div_out, (others=>'0'), s3_exe_out);
 	
 	-- REGISTERS : [EXE]||[MEM]
 	REG_ALU: Reg
@@ -493,7 +555,7 @@ begin
 	port map(rst, cw(CW_S3_LATCH), clk, s3_wr_addr, s4_wr_addr);
 	
 	----------------------------------------------------------------------------
-	-- FIXME
+	-- NOTE:
 	-- COMP: REG_OPRD_A_WAIT, REG_OPRD_B_WAIT
 	-- DESC: Registers for keeping the operand A and B to PIPELINE STATGE 4 [MEM].
 	--			When A causes a STALL, due to forward value is not ready (Load After Read)
@@ -547,6 +609,6 @@ begin
 	port map(rst, cw(CW_S4_LATCH), clk, s4_wr_addr, s5_wr_addr);
 	
 	-- PIPELINE STAGE 5 : [WB]
-	-- No component needed in pipeline 5, cause every operation happens in Register File.
+	-- No component needed in pipeline 5, because every operation happens in Register File.
 	
 end data_path_arch;

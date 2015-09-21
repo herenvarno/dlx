@@ -1,9 +1,10 @@
 #!/bin/sh
 
-if [ $# != 1 ];
+if [ $# != 1 -a $# != 2 ];
 then
 	echo $#
-	echo "Argument error! use './sim [Component Name]' or './sim clean'"
+	echo "Argument error! use './sim [Component Name]', './sim [Component Name] [Testbench Name]' or './sim clean'"
+	exit -1
 fi
 if [ $1 == "clean" ];
 then
@@ -14,6 +15,13 @@ then
 	cd work		
 	rm -rf ./*
 else
+	if [ $# == 2 ];
+	then
+		cd ..
+		cp asm_example/$2.asm asm_example/test.asm
+		./assembler.sh asm_example/test.asm
+		cd dlx_sim
+	fi
 	cd work
 	make -f ../Makefiles/$1.make
 fi

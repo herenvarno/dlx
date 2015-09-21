@@ -4,8 +4,8 @@
 -- 
 -- Author:
 -- Create: 2015-05-24
--- Update: 2015-05-24
--- Status: UNTESTED
+-- Update: 2015-09-20
+-- Status: TESTED
 --------------------------------------------------------------------------------
 
 library ieee;
@@ -33,12 +33,14 @@ architecture dlx_arch of Dlx is
 			OPCD_SIZE	: integer := C_SYS_OPCD_SIZE;			-- Op Code Size
 			FUNC_SIZE	: integer := C_SYS_FUNC_SIZE;			-- Func Field Size for R-Type Ops
 			CWRD_SIZE	: integer := C_SYS_CWRD_SIZE;			-- Control Word Size
-			CALU_SIZE	: integer := C_CTR_CALU_SIZE			-- ALU Op Code Word Size
+			CALU_SIZE	: integer := C_CTR_CALU_SIZE;			-- ALU Op Code Word Size
+			ADDR_SIZE	: integer := C_SYS_ADDR_SIZE			-- Address size
 		);
 		port(
 			clk		: in  std_logic;
 			rst		: in  std_logic;
 			ir		: in std_logic_vector(ISTR_SIZE-1 downto 0):=(others=>'0');
+			pc		: in std_logic_vector(ADDR_SIZE-1 downto 0):=(others=>'0');
 			reg_a	: in std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
 			ld_a	: in std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
 	  		sig_bal	: in std_logic:='0';
@@ -101,6 +103,7 @@ architecture dlx_arch of Dlx is
 	  		istr_addr	: out std_logic_vector(ADDR_SIZE-1 downto 0);
 	  		istr_val	: in std_logic_vector(ISTR_SIZE-1 downto 0):=(others=>'0');
 	  		ir_out		: out std_logic_vector(ISTR_SIZE-1 downto 0):=(others=>'0');
+	  		pc_out		: out std_logic_vector(ADDR_SIZE-1 downto 0):=(others=>'0');
 	  		reg_a_out	: out std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
 	  		ld_a_out	: out std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
 	  		data_addr	: out std_logic_vector(ADDR_SIZE-1 downto 0):=(others=>'0');
@@ -136,6 +139,7 @@ architecture dlx_arch of Dlx is
 	signal do_bus	: std_logic_vector(DATA_SIZE-1 downto 0);
 	signal addr_bus : std_logic_vector(ADDR_SIZE-1 downto 0);
 	signal ir		: std_logic_vector(ISTR_SIZE-1 downto 0);
+	signal pc		: std_logic_vector(ADDR_SIZE-1 downto 0);
 	signal cw		: std_logic_vector(CWRD_SIZE-1 downto 0);
 	signal dr_cw	: std_logic_vector(DRCW_SIZE-1 downto 0);
 	signal calu		: std_logic_vector(CALU_SIZE-1 downto 0);
@@ -151,7 +155,7 @@ architecture dlx_arch of Dlx is
 begin
 	CU0: ControlUnit
 	generic map(ISTR_SIZE, DATA_SIZE, OPCD_SIZE, FUNC_SIZE, CWRD_SIZE, CALU_SIZE)
-	port map(clk, rst, ir, reg_a_val, ld_a_val, sig_bal, sig_bpw, sig_jral, sig_ral, sig_mul, sig_div, cw, calu);
+	port map(clk, rst, ir, pc, reg_a_val, ld_a_val, sig_bal, sig_bpw, sig_jral, sig_ral, sig_mul, sig_div, cw, calu);
 	
 	IR0: InstructionRam
 	generic map(ADDR_SIZE, ISTR_SIZE)
@@ -163,6 +167,6 @@ begin
 	
 	DP0: DataPath
 	generic map(ADDR_SIZE, DATA_SIZE, ISTR_SIZE, OPCD_SIZE, IMME_SIZE, CWRD_SIZE, CALU_SIZE, DRCW_SIZE)
-	port map(clk, rst, pc_bus, ir_bus, ir, reg_a_val, ld_a_val, addr_bus, do_bus, di_bus, cw, dr_cw, calu, sig_bal, sig_bpw, sig_jral, sig_ral, sig_mul, sig_div);
+	port map(clk, rst, pc_bus, ir_bus, ir, pc, reg_a_val, ld_a_val, addr_bus, do_bus, di_bus, cw, dr_cw, calu, sig_bal, sig_bpw, sig_jral, sig_ral, sig_mul, sig_div);
 	
 end dlx_arch;

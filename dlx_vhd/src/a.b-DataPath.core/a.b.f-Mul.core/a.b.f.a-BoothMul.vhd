@@ -24,6 +24,8 @@ entity BoothMul is
 	port (
 		rst: in std_logic;
 		clk: in std_logic;
+		en: in std_logic;
+		lock: in std_logic;
 		a : in std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');	-- Data A
 		b : in std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');	-- Data B
 		o : out std_logic_vector(DATA_SIZE*2-1 downto 0):=(others=>'0')	-- Data Out
@@ -85,73 +87,114 @@ architecture booth_mul_arch of BoothMul is
 		);
 	end component;
 
-	constant layer : integer:=(DATA_SIZE/2)/STAGE;
-	type Sels is array (layer-1 downto 0) of std_logic_vector(2 downto 0);
-	type Gens is array (layer-1 downto 0) of std_logic_vector(DATA_SIZE*2-1 downto 0);
-	type SelArray is array (STAGE-1 downto 0) of Sels;
-	type GenArray is array (STAGE-1 downto 0) of Gens;
-	type AArray is array (STAGE-1 downto 0) of std_logic_vector(DATA_SIZE*2-1 downto 0);
-	type BArray is array (STAGE-1 downto 0) of std_logic_vector(DATA_SIZE downto 0);
-	signal sel:SelArray;
-	signal ya, y2a, muxout, zerosels, zeroselout, addout, regout:GenArray;
-	signal e_a: AArray;
-	signal e_b: BArray;
+	signal sel:std_logic_vector(2 downto 0);
+	signal ya, y2a : std_logic_vector(DATA_SIZE*2-1 downto 0);
+	signal e_a, e_a_dir, a_mux: std_logic_vector(DATA_SIZE*2-1 downto 0);
+	signal e_b, e_b_dir, b_mux: std_logic_vector(DATA_SIZE downto 0);
+	signal mux_out, zero_out, add_out, add_out_reg:std_logic_vector(DATA_SIZE*2-1 downto 0);
+	signal c_state, n_state : integer:=0;
+	
+	signal en_input, sel_ab, local_rst, en_o, reg_rst : std_logic;
 begin
-	e_b(0)<=b & '0';
-	e_a(0)(DATA_SIZE-1 downto 0)<=a;
-	e_a(0)(DATA_SIZE*2-1 downto DATA_SIZE)<=(others=>a(DATA_SIZE-1));
-	regout(0)(0) <= (others=>'0');
+	
+	P0: process(clk, en, en_input, lock)
+	begin
+		if rising_edge(clk) then
+			if en='1' and en_input='1' then
+				e_a <= e_a_dir;
+				e_b <= e_b_dir;
+			else
+				e_b(DATA_SIZE-2 downto 0)<=e_b(DATA_SIZE downto 2);
+				e_b(DATA_SIZE downto DATA_SIZE-1)<=(others=>'0');
+				e_a(DATA_SIZE*2-1 downto 2)<=e_a(DATA_SIZE*2-3 downto 0);
+				e_a(1 downto 0)<=(others=>'0');
+			end if;
+		end if;
+	end process;
+	
+	e_a_dir(DATA_SIZE-1 downto 0)<=a;
+	e_a_dir(DATA_SIZE*2-1 downto DATA_SIZE)<=(others=>a(DATA_SIZE-1));
+	e_b_dir <= b & '0';
+	
+	a_mux <= e_a;
+	b_mux <= e_b;
+	
+	BEC0: BoothEncoder
+	port map(e_b(2 downto 0), sel);
+	
+	ya <= a_mux;
+	y2a(DATA_SIZE*2-1 downto 1) <= a_mux(DATA_SIZE*2-2 downto 0);
+	y2a(0) <= '0';
+	
+	MUX0: Mux
+	generic map(DATA_SIZE*2)
+	port map(sel(0), ya, y2a, mux_out);
+	
+	zero_out <= mux_out when sel(2)='1' else (others=>'0');
+	
+	ADDSUBn: AddSub
+	generic map(DATA_SIZE*2)
+	port map(sel(1), add_out_reg, zero_out, add_out, open);
+	
+	reg_rst <= rst and local_rst;
+	
+	REG0: Reg
+	generic map(DATA_SIZE*2)
+	port map(reg_rst, en_o, clk, add_out, add_out_reg);
+	
+	o <= add_out;
 
-	GEX: for i in 0 to STAGE-1 generate
-		GEY: for j in 0 to layer-1 generate
-		begin
-			BEC0: BoothEncoder
-			port map(e_b(i)(((i*layer)+j+1)*2 downto ((i*layer)+j)*2), sel(i)(j));
-		
-			GEN0: BoothGenerator
-			generic map(DATA_SIZE, (i*layer)+j)
-			port map(e_a(i), ya(i)(j), y2a(i)(j));
-		
-			MUX0: Mux
-			generic map(DATA_SIZE*2)
-			port map(sel(i)(j)(0), ya(i)(j), y2a(i)(j), muxout(i)(j));
-		
-			zerosels(i)(j) <= (others => sel(i)(j)(2));
-			zeroselout(i)(j) <= muxout(i)(j) and zerosels(i)(j);
-			
-			GE0: if j=0 generate
-			begin
-				ADDSUBn: AddSub
-				generic map(DATA_SIZE*2)
-				port map(sel(i)(j)(1), regout(i)(0), zeroselout(i)(j), addout(i)(j), open);
-			end generate;
-			
-			GE1: if j/=0 generate
-			begin
-				ADDSUBn: AddSub
-				generic map(DATA_SIZE*2)
-				port map(sel(i)(j)(1), addout(i)(j-1), zeroselout(i)(j), addout(i)(j), open);
-			end generate;
-		end generate;
-		
-		
-		GE2: if i<STAGE-1 generate 
-		begin
-			-- Register here
-			REG0: Reg
-			generic map(DATA_SIZE*2)
-			port map(rst, '1', clk, addout(i)(layer-1), regout(i+1)(0));
-			REG1: Reg
-			generic map(DATA_SIZE*2)
-			port map(rst, '1', clk, e_a(i), e_a(i+1));
-			REG2: Reg
-			generic map(DATA_SIZE+1)
-			port map(rst, '1', clk, e_b(i), e_b(i+1));
-		end generate;
-		GE3: if i=STAGE-1 generate
-		begin
-			o<=addout(STAGE-1)(layer-1);
-		end generate;
-	end generate;
+	
+	-- FSM
+	-- NEXT STATE GENERATOR
+	P_NSG1: process(en, c_state, lock)	
+	begin
+		if en='1' and lock='1' then
+			n_state<=SG_ST0;
+		else
+			if en='1' and c_state = SG_ST0 and lock='0' then
+				n_state<=SG_ST1;
+			else
+				if c_state = SG_ST0 or c_state >= STAGE then
+					n_state <= SG_ST0;
+				else
+					n_state <= c_state + 1;
+				end if;
+			end if;
+		end if;
+	end process;
+	
+	-- OUTPUT GENERATOR
+	P_OUT1: process(c_state)
+	begin
+		if c_state=SG_ST1 then
+			en_input <= '0';
+			sel_ab <= '0';
+			en_o <= '1';
+			local_rst <= '1';
+		elsif c_state>SG_ST1 and c_state<STAGE+1 then
+			en_input <= '0';
+			sel_ab <= '1';
+			en_o <= '1';
+			local_rst <= '1';
+		else
+			en_input <= '1';
+			sel_ab <= '1';
+			en_o <= '0';
+			local_rst <= '0';
+		end if;
+	end process;
+
+	-- NEXT STATE REGISTER
+	P_REG1: process(rst, clk)
+	begin
+		if rst='0' then
+			c_state <= SG_ST0;
+		else
+			if rising_edge(clk) then
+				c_state <= n_state;
+			end if;
+		end if;
+	end process;
 	
 end booth_mul_arch;

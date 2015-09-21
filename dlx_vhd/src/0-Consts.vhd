@@ -4,7 +4,7 @@
 --
 -- Author:
 -- Create: 2015-05-20
--- Update: 2015-06-05
+-- Update: 2015-09-20
 -- Status: TESTED
 --------------------------------------------------------------------------------
 
@@ -22,14 +22,15 @@ package Consts is
 	constant C_CTR_CALU_SIZE	: integer	:= 5;			-- ALU Operation Code size
 	constant C_CTR_DRCW_SIZE	: integer	:= 4;			-- Data Memory Control word size
 	constant C_ADD_SPARSITY		: integer	:= 4;			-- Sparsity of Adder carray generator
-	constant C_MUL_STAGE		: integer	:= 4;			-- Stage of multiply operation
-	constant C_DIV_STAGE		: integer	:= 4;			-- Stage of division operation
+	constant C_MUL_STAGE		: integer	:= 8;			-- Stage of multiply operation
+	constant C_DIV_STAGE		: integer	:= C_SYS_DATA_SIZE+1;-- Stage of division operation
 	constant C_REG_NUM			: integer	:= 32;			-- Number of Register in Register File
 	constant C_REG_GLOBAL_NUM	: integer	:= 8;			-- Number of Global register in register file
 	constant C_REG_GENERAL_NUM	: integer	:= 8;			-- Number of General registers (I/L/O) in register file
 	constant C_REG_WINDOW_NUM	: integer	:= 8;			-- Number of Windows in register file
-	constant C_RAM_IRAM_SIZE	: integer	:= 10240;		-- IRAM size
-	constant C_RAM_DRAM_SIZE	: integer	:= 10240;		-- DRAM size
+	constant C_RAM_IRAM_SIZE	: integer	:= 1024;		-- IRAM size
+	constant C_RAM_DRAM_SIZE	: integer	:= 1024;		-- DRAM size
+	constant C_BPU_ADDR_SIZE	: integer	:= 8;			-- BPU ADDR SIZE
 	
 	-- ALU Operations
 	constant OP_ADD		: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "00000";	--0x00
@@ -140,45 +141,28 @@ package Consts is
 	constant FUNC_SGEU	: std_logic_vector(C_SYS_FUNC_SIZE-1 downto 0) := "00000111101";	--0x3d
 	
 	-- STALL GENERATOR STATES
-	constant SG_ST00000	: integer := 0;		-- STALL NONE
-	constant SG_ST00001	: integer := 1;		-- STALL STAGE 1
-	constant SG_ST00010	: integer := 2;		-- STALL STAGE 2
-	constant SG_ST00011	: integer := 3;		-- STALL STAGE 1,2
-	constant SG_ST00100	: integer := 4;		-- STALL STAGE 3
-	constant SG_ST00101	: integer := 5;		-- STALL STAGE 1,3
-	constant SG_ST00110	: integer := 6;		-- STALL STAGE 2,3
-	constant SG_ST00111	: integer := 7;		-- STALL STAGE 1,2,3
-	constant SG_ST01000	: integer := 8;		-- STALL STAGE 4
-	constant SG_ST01001	: integer := 9;		-- STALL STAGE 1,4
-	constant SG_ST01010	: integer := 10;	-- STALL STAGE 2,4
-	constant SG_ST01011	: integer := 11;	-- STALL STAGE 1,2,4
-	constant SG_ST01100	: integer := 12;	-- STALL STAGE 3,4
-	constant SG_ST01101	: integer := 13;	-- STALL STAGE 1,3,4
-	constant SG_ST01110	: integer := 14;	-- STALL STAGE 2,3,4
-	constant SG_ST01111	: integer := 15;	-- STALL STAGE 1,2,3,4
-	constant SG_ST10000	: integer := 16;	-- STALL STAGE 5
-	constant SG_ST10001	: integer := 17;	-- STALL STAGE 1,5
-	constant SG_ST10010	: integer := 18;	-- STALL STAGE 2,5
-	constant SG_ST10011	: integer := 19;	-- STALL STAGE 1,2,5
-	constant SG_ST10100	: integer := 20;	-- STALL STAGE 3,5
-	constant SG_ST10101	: integer := 21;	-- STALL STAGE 1,3,5
-	constant SG_ST10110	: integer := 22;	-- STALL STAGE 2,3,5
-	constant SG_ST10111	: integer := 23;	-- STALL STAGE 1,2,3,5
-	constant SG_ST11000	: integer := 24;	-- STALL STAGE 4,5
-	constant SG_ST11001	: integer := 25;	-- STALL STAGE 1,4,5
-	constant SG_ST11010	: integer := 26;	-- STALL STAGE 2,4,5
-	constant SG_ST11011	: integer := 27;	-- STALL STAGE 1,2,4,5
-	constant SG_ST11100	: integer := 28;	-- STALL STAGE 3,4,5
-	constant SG_ST11101	: integer := 29;	-- STALL STAGE 1,3,4,5
-	constant SG_ST11110	: integer := 30;	-- STALL STAGE 2,3,4,5
-	constant SG_ST11111	: integer := 31;	-- STALL STAGE 1,2,3,4,5
-	
 	constant SG_ST0		: integer := 0;
 	constant SG_ST1		: integer := 1;
 	constant SG_ST2		: integer := 2;
 	constant SG_ST3		: integer := 3;
 	constant SG_ST4		: integer := 4;
 	constant SG_ST5		: integer := 5;
-	
-	
+	constant SG_ST6		: integer := 6;
+	constant SG_ST7		: integer := 7;
+	constant SG_ST8		: integer := 8;
+	constant SG_ST9		: integer := 9;
+	constant SG_ST10	: integer := 10;
+	constant SG_ST11	: integer := 11;
+	constant SG_ST12	: integer := 12;
+	constant SG_ST13	: integer := 13;
+	constant SG_ST14	: integer := 14;
+	constant SG_ST15	: integer := 15;
+	constant SG_ST16	: integer := 16;
+	constant SG_ST17	: integer := 17;
+	constant SG_ST18	: integer := 18;
+	constant SG_ST19	: integer := 19;
+	constant SG_ST20	: integer := 20;
+	constant SG_ST21	: integer := 21;
+	constant SG_ST22	: integer := 22;
+	constant SG_ST23	: integer := 23;
 end package Consts;

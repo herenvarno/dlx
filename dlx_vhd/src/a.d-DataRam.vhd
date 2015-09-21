@@ -71,7 +71,7 @@ begin
 			if clk'event and clk='0' then
 			
 				addr_ph := to_integer(unsigned(addr(MyLog2Ceil(DRAM_SIZE)-1 downto 0)));
-				if addr_ph >= DRAM_SIZE then
+				if addr_ph >= DRAM_SIZE-4 then
 					addr_ph := DRAM_SIZE-4;
 				end if;
 

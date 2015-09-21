@@ -5,7 +5,7 @@
 -- Author:
 -- Create: 2015-08-14
 -- Update: 2015-08-14
--- Status: UNFINISHED
+-- Status: TESTED
 --------------------------------------------------------------------------------
 
 library ieee;
@@ -24,6 +24,8 @@ entity Mul is
 	port (
 		rst: in std_logic;
 		clk: in std_logic;
+		en: in std_logic;
+		lock: in std_logic;
 		a : in std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');	-- Data A
 		b : in std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');	-- Data B
 		o : out std_logic_vector(DATA_SIZE*2-1 downto 0):=(others=>'0')	-- Data Out
@@ -42,6 +44,8 @@ architecture mul_arch_struct of Mul is
 		port (
 			rst: in std_logic;
 			clk: in std_logic;
+			en: in std_logic;
+			lock: in std_logic;
 			a : in std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');	-- Data A
 			b : in std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');	-- Data B
 			o : out std_logic_vector(DATA_SIZE*2-1 downto 0):=(others=>'0')	-- Data Out
@@ -50,5 +54,5 @@ architecture mul_arch_struct of Mul is
 begin
 	BM0: BoothMul
 	generic map (DATA_SIZE, STAGE)
-	port map (rst, clk, a, b, o);
+	port map (rst, clk, en, lock, a, b, o);
 end mul_arch_struct;

@@ -4,8 +4,8 @@
 --
 -- Author:
 -- Create: 2015-07-29
--- Update: 2015-08-14
--- Status: UNFINISHED
+-- Update: 2015-09-20
+-- Status: TESTED
 --------------------------------------------------------------------------------
 
 library ieee;
@@ -48,6 +48,9 @@ architecture stall_generator_arch of StallGenerator is
 	signal c_state_mul, n_state_mul : integer := SG_ST0;
 	signal c_state_div, n_state_div : integer := SG_ST0;
 	signal c_state_stu, n_state_stu : integer := SG_ST0;
+	
+	constant MUL_STAGE : integer := C_MUL_STAGE;
+	constant DIV_STAGE : integer := C_DIV_STAGE;
 begin
 	-- A OR B WAIT SIGNAL
 	-- NEXT STATE GENERATOR
@@ -171,10 +174,10 @@ begin
 	-- NEXT STATE GENERATOR
 	P_NSG4: process(sig_mul, sig_ral, c_state_mul)
 	begin
-		if (sig_mul='1') and (sig_ral='0') and (c_state_mul=SG_ST0) then
+		if (sig_mul='1') and (sig_ral='0') and ((c_state_mul=SG_ST0) or (c_state_mul=MUL_STAGE+1)) then
 			n_state_mul<=SG_ST1;
 		else
-			if c_state_mul = SG_ST0 or c_state_mul >= SG_ST4 then
+			if c_state_mul = SG_ST0 or c_state_mul >= MUL_STAGE+1 then
 				n_state_mul <= SG_ST0;
 			else
 				n_state_mul <= c_state_mul + 1;
@@ -185,14 +188,19 @@ begin
 	-- OUTPUT GENERATOR
 	P_OUT4: process(c_state_mul)
 	begin
-		case c_state_mul is
-			when SG_ST0 => s_mul <= "00000";
-			when SG_ST1 => s_mul <= "11110";
-			when SG_ST2 => s_mul <= "11111";
-			when SG_ST3 => s_mul <= "00011";
-			when SG_ST4 => s_mul <= "00001";
-			when others => s_mul <= "00000";
-		end case;
+		if c_state_mul=SG_ST0 then
+			s_mul <= "00000";
+		elsif c_state_mul=SG_ST1 then
+			 s_mul <= "11110";
+		elsif c_state_mul>SG_ST1 and c_state_mul<MUL_STAGE then
+			s_mul <= "11111";
+		elsif c_state_mul=MUL_STAGE then
+			s_mul <= "00011";
+		elsif c_state_mul=MUL_STAGE+1 then
+			s_mul <= "00001";
+		else
+			s_mul <= "00000";
+		end if;
 	end process;
 
 	-- NEXT STATE REGISTER
@@ -203,6 +211,51 @@ begin
 		else
 			if rising_edge(clk) then
 				c_state_mul <= n_state_mul;
+			end if;
+		end if;
+	end process;
+	
+	-- DIV SIGNAL
+	-- NEXT STATE GENERATOR
+	P_NSG6: process(sig_div, sig_ral, c_state_div)
+	begin
+		if (sig_div='1') and (sig_ral='0') and ((c_state_div=SG_ST0)or (c_state_div=DIV_STAGE+1)) then
+			n_state_div<=SG_ST1;
+		else
+			if c_state_div = SG_ST0 or c_state_div >= DIV_STAGE+1 then
+				n_state_div <= SG_ST0;
+			else
+				n_state_div <= c_state_div + 1;
+			end if;
+		end if;
+	end process;
+	
+	-- OUTPUT GENERATOR
+	P_OUT6: process(c_state_div)
+	begin
+		if c_state_div=SG_ST0 then
+			s_div <= "00000";
+		elsif c_state_div=SG_ST1 then
+			 s_div <= "11110";
+		elsif c_state_div>SG_ST1 and c_state_div<DIV_STAGE then
+			s_div <= "11111";
+		elsif c_state_div=DIV_STAGE then
+			s_div <= "00011";
+		elsif c_state_div=DIV_STAGE+1 then
+			s_div <= "00001";
+		else
+			s_div <= "00000";
+		end if;
+	end process;
+
+	-- NEXT STATE REGISTER
+	P_REG6: process(rst, clk)
+	begin
+		if rst='0' then
+			c_state_div <= SG_ST0;
+		else
+			if rising_edge(clk) then
+				c_state_div <= n_state_div;
 			end if;
 		end if;
 	end process;
@@ -223,10 +276,10 @@ begin
 	begin
 		case c_state_stu is
 			when SG_ST0 => s_stu <= "11111";
-			when SG_ST1 => s_stu <= "01111";
-			when SG_ST2 => s_stu <= "00111";
-			when SG_ST3 => s_stu <= "00011";
-			when SG_ST4 => s_stu <= "00001";
+			when SG_ST1 => s_stu <= "00111";
+			when SG_ST2 => s_stu <= "00011";
+			when SG_ST3 => s_stu <= "00001";
+			when SG_ST4 => s_stu <= "00000";
 			when SG_ST5 => s_stu <= "00000";
 			when others => s_stu <= "00000";
 		end case;
@@ -244,10 +297,10 @@ begin
 		end if;
 	end process;
 	
-	P_FIN: process(s_ral, s_bpw, s_mul, s_div, sig_ral, sig_bpw, sig_jral, sig_mul, sig_div, c_state_mul)
+	P_FIN: process(s_ral, s_bpw, s_mul, s_div, s_stu, sig_ral, sig_bpw, sig_jral, sig_mul, sig_div, c_state_mul)
 		variable stall_flag_tmp: std_logic_vector(4 downto 0);
 	begin
-		stall_flag_tmp := s_ral or s_bpw or s_mul or s_div;
+		stall_flag_tmp := s_ral or s_bpw or s_mul or s_div or s_stu;
 		if (sig_ral='1') then
 			stall_flag_tmp := stall_flag_tmp or "11100";
 		end if;
@@ -260,7 +313,10 @@ begin
 			stall_flag_tmp := stall_flag_tmp or "11000";
 		end if;
 		
-		if (sig_mul='1') and (sig_ral='0') and (c_state_mul=SG_ST0) then
+		if (sig_mul='1') and (sig_ral='0') and ((c_state_mul=SG_ST0) or (c_state_mul=MUL_STAGE+1)) then
+			stall_flag_tmp := stall_flag_tmp or "11100";
+		end if;
+		if (sig_div='1') and (sig_ral='0') and ((c_state_div=SG_ST0) or (c_state_div=DIV_STAGE+1)) then
 			stall_flag_tmp := stall_flag_tmp or "11100";
 		end if;
 		

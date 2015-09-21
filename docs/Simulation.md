@@ -11,6 +11,9 @@
 To simulate a component, use:
 `./sim [EntityName]`
 
+To simulate a component with testbench, use:
+`./sim [EntityName] [TestbenchName]`
+
 To clean up, use:
 `./sim clean`
 

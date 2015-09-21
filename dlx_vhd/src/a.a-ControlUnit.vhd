@@ -5,7 +5,7 @@
 -- Author:
 -- Create: 2015-06-01
 -- Update: 2015-06-02
--- Status: UNTESTED
+-- Status: TESTED
 --------------------------------------------------------------------------------
 
 library ieee;
@@ -24,12 +24,14 @@ entity ControlUnit is
 		OPCD_SIZE	: integer := C_SYS_OPCD_SIZE;			-- Op Code Size
 		FUNC_SIZE	: integer := C_SYS_FUNC_SIZE;			-- Func Field Size for R-Type Ops
 		CWRD_SIZE	: integer := C_SYS_CWRD_SIZE;			-- Control Word Size
-		CALU_SIZE	: integer := C_CTR_CALU_SIZE			-- ALU Op Code Word Size
+		CALU_SIZE	: integer := C_CTR_CALU_SIZE;			-- ALU Op Code Word Size
+		ADDR_SIZE	: integer := C_SYS_ADDR_SIZE			-- Address size
 	);
 	port(
 		clk		: in  std_logic;
 		rst		: in  std_logic;
 		ir		: in std_logic_vector(ISTR_SIZE-1 downto 0):=(others=>'0');
+		pc		: in std_logic_vector(ADDR_SIZE-1 downto 0):=(others=>'0');
 		reg_a	: in std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
 		ld_a	: in std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
 	  	sig_bal	: in std_logic:='0';
@@ -80,20 +82,22 @@ architecture control_unit_arch of ControlUnit is
 			sig_div			: in std_logic := '0';		-- from CwGenerator
 			stall_flag		: out std_logic_vector(4 downto 0):=(others=>'0')
 		);
-	end component;
+	end component;	
 	component Branch is
 		generic (
 			DATA_SIZE : integer := C_SYS_DATA_SIZE;
-			OPCD_SIZE : integer := C_SYS_OPCD_SIZE
+			OPCD_SIZE : integer := C_SYS_OPCD_SIZE;
+			ADDR_SIZE : integer := C_SYS_ADDR_SIZE
 		);
 		port (
 			rst		: in std_logic;
 			clk		: in std_logic;
-			reg_a	: in std_logic_vector(DATA_SIZE-1 downto 0);
-			ld_a	: in std_logic_vector(DATA_SIZE-1 downto 0);
-			opcd	: in std_logic_vector(OPCD_SIZE-1 downto 0);
+			reg_a	: in std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
+			ld_a	: in std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
+			opcd	: in std_logic_vector(OPCD_SIZE-1 downto 0):=(others=>'0');
+			addr	: in std_logic_vector(ADDR_SIZE-1 downto 0):=(others=>'0');
 			sig_bal	: in std_logic:='0';
-	  		sig_bpw	: out std_logic :='0';
+		  	sig_bpw	: out std_logic :='0';
 			sig_brt	: out std_logic :='0'
 		);
 	end component;
@@ -113,8 +117,8 @@ begin
 	port map(rst, clk, sig_ral, sig_bpw_tmp, sig_jral, sig_mul, sig_div, stall_flag);
 	
 	BR	: Branch
-	generic map(DATA_SIZE, OPCD_SIZE)
-	port map(rst, clk, reg_a, ld_a, ir(ISTR_SIZE-1 downto ISTR_SIZE-OPCD_SIZE), sig_bal, sig_bpw_tmp, sig_brt);
+	generic map(DATA_SIZE, OPCD_SIZE, ADDR_SIZE)
+	port map(rst, clk, reg_a, ld_a, ir(ISTR_SIZE-1 downto ISTR_SIZE-OPCD_SIZE), pc, sig_bal, sig_bpw_tmp, sig_brt);
 	
 	sig_bpw <= sig_bpw_tmp;
 	
