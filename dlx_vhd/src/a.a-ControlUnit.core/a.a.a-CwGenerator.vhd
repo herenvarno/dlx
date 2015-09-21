@@ -278,8 +278,12 @@ begin
 				calu2 <= OP_ADD;
 			end if;
 		elsif (opcd=OPCD_F) then
-			if (func=FUNC_MULT) then						-- MULT
+			if (func=FUNC_MULTU) then						-- MULTU
+				calu2 <= OP_MULTU;
+			elsif (func=FUNC_MULT) then						-- MULT
 				calu2 <= OP_MULT;
+			elsif (func=FUNC_DIVU) then						-- DIVU
+				calu2 <= OP_DIVU;
 			elsif (func=FUNC_DIV) then						-- DIV
 				calu2 <= OP_DIV;
 			end if;

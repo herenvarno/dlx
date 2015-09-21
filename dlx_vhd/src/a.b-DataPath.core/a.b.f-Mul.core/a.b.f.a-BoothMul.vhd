@@ -26,6 +26,7 @@ entity BoothMul is
 		clk: in std_logic;
 		en: in std_logic;
 		lock: in std_logic;
+		sign: in std_logic;
 		a : in std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');	-- Data A
 		b : in std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');	-- Data B
 		o : out std_logic_vector(DATA_SIZE*2-1 downto 0):=(others=>'0')	-- Data Out
@@ -63,6 +64,17 @@ architecture booth_mul_arch of BoothMul is
 			dout: out std_logic_vector(DATA_SIZE-1 downto 0)
 		);
 	end component;
+	component Adder is
+		generic(
+			DATA_SIZE : integer := C_SYS_DATA_SIZE
+		);
+		port(
+			cin: in std_logic;
+			a, b: in std_logic_vector(DATA_SIZE-1 downto 0);
+			s : out std_logic_vector(DATA_SIZE-1 downto 0);
+			cout: out std_logic
+		);
+	end component;
 	component AddSub is
 		generic(
 			DATA_SIZE : integer := C_SYS_DATA_SIZE/2
@@ -95,6 +107,9 @@ architecture booth_mul_arch of BoothMul is
 	signal c_state, n_state : integer:=0;
 	
 	signal en_input, sel_ab, local_rst, en_o, reg_rst : std_logic;
+	signal adj_sum : std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
+	signal adj_cout : std_logic:='0';
+	signal adj_final, adj_final_mod : std_logic_vector(DATA_SIZE*2-1 downto 0):=(others=>'0');
 begin
 	
 	P0: process(clk, en, en_input, lock)
@@ -103,6 +118,7 @@ begin
 			if en='1' and en_input='1' then
 				e_a <= e_a_dir;
 				e_b <= e_b_dir;
+				adj_final_mod <= adj_final;
 			else
 				e_b(DATA_SIZE-2 downto 0)<=e_b(DATA_SIZE downto 2);
 				e_b(DATA_SIZE downto DATA_SIZE-1)<=(others=>'0');
@@ -112,10 +128,21 @@ begin
 		end if;
 	end process;
 	
-	e_a_dir(DATA_SIZE-1 downto 0)<=a;
-	e_a_dir(DATA_SIZE*2-1 downto DATA_SIZE)<=(others=>a(DATA_SIZE-1));
-	e_b_dir <= b & '0';
+	e_a_dir(DATA_SIZE-1) <= a(DATA_SIZE-1) and sign;
+	e_a_dir(DATA_SIZE-2 downto 0)<=a(DATA_SIZE-2 downto 0);
+	e_a_dir(DATA_SIZE*2-1 downto DATA_SIZE)<=(others=>(a(DATA_SIZE-1) and sign));
+	e_b_dir(DATA_SIZE) <= b(DATA_SIZE-1) and sign;
+	e_b_dir(DATA_SIZE-1 downto 1)<=b(DATA_SIZE-2 downto 0);
+	e_b_dir(0) <= '0';
 	
+	ADJUST0: Adder
+	generic map(DATA_SIZE)
+	port map('0', a, b, adj_sum, adj_cout);
+	
+	adj_final(DATA_SIZE*2-1) <= (adj_cout xnor adj_sum(DATA_SIZE-1)) and (not sign);
+	adj_final(DATA_SIZE*2-2 downto DATA_SIZE-1) <= ((not adj_sum(DATA_SIZE-1)) & adj_sum(DATA_SIZE-2 downto 0)) and (adj_sum'range=>(not sign));
+	adj_final(DATA_SIZE-2 downto 0) <= (others=>'0');
+
 	a_mux <= e_a;
 	b_mux <= e_b;
 	
@@ -142,8 +169,9 @@ begin
 	generic map(DATA_SIZE*2)
 	port map(reg_rst, en_o, clk, add_out, add_out_reg);
 	
-	o <= add_out;
-
+	ADJUST1: Adder
+	generic map(DATA_SIZE*2)
+	port map('0', add_out_reg, adj_final_mod, o, open);
 	
 	-- FSM
 	-- NEXT STATE GENERATOR
@@ -155,7 +183,7 @@ begin
 			if en='1' and c_state = SG_ST0 and lock='0' then
 				n_state<=SG_ST1;
 			else
-				if c_state = SG_ST0 or c_state >= STAGE then
+				if c_state = SG_ST0 or c_state >= STAGE-1 then
 					n_state <= SG_ST0;
 				else
 					n_state <= c_state + 1;
@@ -172,7 +200,7 @@ begin
 			sel_ab <= '0';
 			en_o <= '1';
 			local_rst <= '1';
-		elsif c_state>SG_ST1 and c_state<STAGE+1 then
+		elsif c_state>SG_ST1 and c_state<STAGE then
 			en_input <= '0';
 			sel_ab <= '1';
 			en_o <= '1';

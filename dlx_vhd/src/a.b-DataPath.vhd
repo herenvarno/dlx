@@ -151,6 +151,7 @@ architecture data_path_arch of DataPath is
 			clk: in std_logic;
 			en: in std_logic;
 			lock: in std_logic;
+			sign: in std_logic;
 			a : in std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');	-- Data A
 			b : in std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');	-- Data B
 			o : out std_logic_vector(DATA_SIZE*2-1 downto 0):=(others=>'0')	-- Data Out
@@ -166,6 +167,7 @@ architecture data_path_arch of DataPath is
 			clk: in std_logic;
 			en: in std_logic:='0';
 			lock: in std_logic:='0';
+			sign: in std_logic:='0';
 			a : in std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');	-- Data A
 			b : in std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');	-- Data B
 			o : out std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0')	-- Data Out
@@ -226,7 +228,7 @@ architecture data_path_arch of DataPath is
 	constant REG_NUM : integer := C_REG_NUM;
 	constant REG_ADDR_SIZE : integer := MyLog2Ceil(REG_NUM);
 	constant MUL_STAGE : integer := C_MUL_STAGE;
-	constant DIV_STAGE : integer := C_MUL_STAGE;
+	constant DIV_STAGE : integer := C_DIV_STAGE;
 	
 	-- Program Counters
 	signal s1_pc, s2_pc, s1_jpc, s2_jpc, s1_npc, s2_npc, s2_fpc: std_logic_vector(ADDR_SIZE-1 downto 0):= (others=>'0');
@@ -250,7 +252,7 @@ architecture data_path_arch of DataPath is
 	signal s3_mul_op, s3_div_op : std_logic:='0';
 	signal s3_exe_sel : std_logic_vector(1 downto 0):= "00";
 	signal s3_alu_out, s3_mul_out, s3_div_out, s3_exe_out, s4_exe_out : std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
-	signal s3_mul_lock, s3_div_lock:std_logic:='0';
+	signal s3_mul_lock, s3_div_lock, s3_mul_sign, s3_div_sign:std_logic:='0';
 	signal s4_mem_in, s4_mem_out : std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
 	signal s4_result, s5_result : std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
 	signal s3_reg_a_wait, s3_reg_b_wait: std_logic:='0';
@@ -492,21 +494,10 @@ begin
 	generic map(DATA_SIZE, REG_ADDR_SIZE)
 	port map(s3_b_keep, s4_exe_out, s5_result, s3_rd2_addr, s4_wr_addr, s5_wr_addr, s3_b_sel_f_en, s3_b_sel_ff_en, cw(CW_S4_LD_FLAG), '0', '1', s3_b_fwd, s3_reg_b_wait, open);
 	
-	----------------------------------------------------------------------------
-	-- FIXME
-	-- New method: use RAL signal produced in stage 2 to trigger RAL stall. So the
-	-- code below is not needed.
-	----------------------------------------------------------------------------
 	PW: process(s3_reg_a_wait, s3_reg_b_wait)
 	begin
 		sig_ral<=(s3_reg_a_wait or s3_reg_b_wait);
 	end process;
-	
-	----------------------------------------------------------------------------
-	-- UPDATE
-	-- New method: use RAL signal produced in stage 2 to trigger RAL stall
-	----------------------------------------------------------------------------
-	--sig_ral <= s3_ral_detect;
 
 	MUXB: Mux
 	generic map(DATA_SIZE)
@@ -518,21 +509,26 @@ begin
 	
 	MUL0: Mul
 	generic map(DATA_SIZE/2, MUL_STAGE)
-	port map(rst, clk, s3_mul_op, s3_mul_lock, s3_a_sel(DATA_SIZE/2-1 downto 0), s3_b_sel(DATA_SIZE/2-1 downto 0), s3_mul_out);
+	port map(rst, clk, s3_mul_op, s3_mul_lock, s3_mul_sign, s3_a_sel(DATA_SIZE/2-1 downto 0), s3_b_sel(DATA_SIZE/2-1 downto 0), s3_mul_out);
 	
 	DIV0: Div
 	generic map(DATA_SIZE, DIV_STAGE)
-	port map(rst, clk, s3_div_op, s3_div_lock, s3_a_sel, s3_b_sel, s3_div_out);
+	port map(rst, clk, s3_div_op, s3_div_lock, s3_div_sign, s3_a_sel, s3_b_sel, s3_div_out);
 	
-	s3_mul_op <= '1' when calu="01000" else '0';
+	----------------------------------------------------------------------------
+	-- FIXME
+	-- only signed mult and unsigned div can produce correct value.
+	----------------------------------------------------------------------------
+	s3_mul_op <= '1' when calu="01000" or calu="01001" else '0';
 	sig_mul <= s3_mul_op;
-	s3_div_op <= '1' when calu="01010" else '0';
+	s3_div_op <= '1' when calu="01010" or calu="01011" else '0';
 	sig_div <= s3_div_op;
 	s3_exe_sel <= s3_div_op & s3_mul_op;
-	
-	
+	s3_mul_sign <= '1' when calu="01001" else '0';
+	s3_div_sign <= '1' when calu="01011" else '0';
 	s3_div_lock <= (s3_reg_a_wait or s3_reg_b_wait);
 	s3_mul_lock <= (s3_reg_a_wait or s3_reg_b_wait);
+
 	MUXEXE: Mux4
 	generic map(DATA_SIZE)
 	port map(s3_exe_sel, s3_alu_out, s3_mul_out, s3_div_out, (others=>'0'), s3_exe_out);

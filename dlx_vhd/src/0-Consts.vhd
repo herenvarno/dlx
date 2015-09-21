@@ -22,8 +22,8 @@ package Consts is
 	constant C_CTR_CALU_SIZE	: integer	:= 5;			-- ALU Operation Code size
 	constant C_CTR_DRCW_SIZE	: integer	:= 4;			-- Data Memory Control word size
 	constant C_ADD_SPARSITY		: integer	:= 4;			-- Sparsity of Adder carray generator
-	constant C_MUL_STAGE		: integer	:= 8;			-- Stage of multiply operation
-	constant C_DIV_STAGE		: integer	:= C_SYS_DATA_SIZE+1;-- Stage of division operation
+	constant C_MUL_STAGE		: integer	:= 10;			-- Stage of multiply operation
+	constant C_DIV_STAGE		: integer	:= 34;			-- Stage of division operation
 	constant C_REG_NUM			: integer	:= 32;			-- Number of Register in Register File
 	constant C_REG_GLOBAL_NUM	: integer	:= 8;			-- Number of Global register in register file
 	constant C_REG_GENERAL_NUM	: integer	:= 8;			-- Number of General registers (I/L/O) in register file
@@ -40,8 +40,10 @@ package Consts is
 	constant OP_SLL		: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "00100";	--0x04
 	constant OP_SRL		: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "00101";	--0x05
 	constant OP_SRA		: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "00111";	--0x07
-	constant OP_MULT	: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "01000";	--0x08
-	constant OP_DIV		: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "01010";	--0x0a
+	constant OP_MULTU	: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "01000";	--0x08	-- unsigned
+	constant OP_MULT	: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "01001";	--0x09	-- signed
+	constant OP_DIVU	: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "01010";	--0x0a	-- unsigned
+	constant OP_DIV		: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "01011";	--0x0b	-- signed
 	constant OP_SUB		: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "10000";	--0x10
 	constant OP_SGT		: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "10001";	--0x11
 	constant OP_SGE		: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "10010";	--0x12
@@ -122,6 +124,8 @@ package Consts is
 	constant FUNC_SRA	: std_logic_vector(C_SYS_FUNC_SIZE-1 downto 0) := "00000000111";	--0x07
 	constant FUNC_MULT	: std_logic_vector(C_SYS_FUNC_SIZE-1 downto 0) := "00000001110";	--0x0e
 	constant FUNC_DIV	: std_logic_vector(C_SYS_FUNC_SIZE-1 downto 0) := "00000001111";	--0x0f
+	constant FUNC_MULTU	: std_logic_vector(C_SYS_FUNC_SIZE-1 downto 0) := "00000010110";	--0x16
+	constant FUNC_DIVU	: std_logic_vector(C_SYS_FUNC_SIZE-1 downto 0) := "00000010111";	--0x17
 	constant FUNC_ADD	: std_logic_vector(C_SYS_FUNC_SIZE-1 downto 0) := "00000100000";	--0x20
 	constant FUNC_ADDU	: std_logic_vector(C_SYS_FUNC_SIZE-1 downto 0) := "00000100001";	--0x21
 	constant FUNC_SUB	: std_logic_vector(C_SYS_FUNC_SIZE-1 downto 0) := "00000100010";	--0x22

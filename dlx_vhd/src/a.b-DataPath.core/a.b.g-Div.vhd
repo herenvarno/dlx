@@ -26,6 +26,7 @@ entity Div is
 		clk: in std_logic;
 		en: in std_logic:='0';
 		lock: in std_logic:='0';
+		sign: in std_logic:='0';										-- 0 UNSIGNED, 1 SIGNED
 		a : in std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');	-- Data A
 		b : in std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');	-- Data B
 		o : out std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0')	-- Data Out
@@ -83,6 +84,7 @@ architecture div_arch of Div is
 		);
 	end component;
 	
+	signal a_adj, b_adj: std_logic_vector(DATA_SIZE-1 downto 0);
 	signal a_mod_dir, b_mod_dir, b_mod, a_mod: std_logic_vector(DATA_SIZE*2-1 downto 0);
 	signal a_mux, b_mux: std_logic_vector(DATA_SIZE*2-1 downto 0);
 	signal r_shf : std_logic_vector(DATA_SIZE*2-1 downto 0);
@@ -94,23 +96,35 @@ architecture div_arch of Div is
 	signal not_r_es_sign : std_logic;
 	signal en_input, sel_r, en_r, en_q : std_logic:='0';
 	signal c_state, n_state : integer:=0;
+	signal inv_a_flag, inv_b_flag, inv_q_flag, inv_q_flag_mod : std_logic:='0';
 	
 begin
 	-- Datapath
 	P0: process(clk, en_input)
 	begin
 		if rising_edge(clk) and en_input='1' then
-			b_mod <= b_mod_dir;
 			a_mod <= a_mod_dir;
+			b_mod <= b_mod_dir;
+			inv_q_flag_mod <= inv_q_flag;
 		end if;
 	end process;
 	
-	a_mod_dir(DATA_SIZE-1 downto 0) <= a;
+	inv_a_flag <= sign and a(DATA_SIZE-1);
+	inv_b_flag <= sign and b(DATA_SIZE-1);
+	inv_q_flag <= sign and (a(DATA_SIZE-1) xor b(DATA_SIZE-1));
+	
+	ADJUST0a: AddSub
+	generic map(DATA_SIZE)
+	port map(inv_a_flag, (a'range=>'0'), a, a_adj, open);
+	ADJUST0b: AddSub
+	generic map(DATA_SIZE)
+	port map(inv_b_flag, (b'range=>'0'), b, b_adj, open);
+
+	a_mod_dir(DATA_SIZE-1 downto 0) <= a_adj;
 	a_mod_dir(DATA_SIZE*2-1 downto DATA_SIZE) <= (others=>'0');
 	b_mod_dir(DATA_SIZE-1 downto 0) <= (others=>'0');
-	b_mod_dir(DATA_SIZE*2-1 downto DATA_SIZE) <= b;
+	b_mod_dir(DATA_SIZE*2-1 downto DATA_SIZE) <= b_adj;
 	
-
 	MUXa: Mux
 	generic map(DATA_SIZE*2)
 	port map(sel_r, a_mod, r, a_mux);
@@ -140,7 +154,9 @@ begin
 	generic map(DATA_SIZE)
 	port map(rst, en_q, clk, not_r_es_sign, q);
 	
-	o<=q;
+	ADJUST: AddSub
+	generic map(DATA_SIZE)
+	port map(inv_q_flag_mod, (q'range=>'0'), q, o, open);
 
 	-- Control Logic (FSM)
 	-- NEXT STATE GENERATOR
@@ -152,7 +168,7 @@ begin
 			if en='1' and c_state = SG_ST0 and lock='0' then
 				n_state<=SG_ST1;
 			else
-				if c_state = SG_ST0 or c_state >= DATA_SIZE+1 then
+				if c_state = SG_ST0 or c_state >= STAGE-1 then
 					n_state <= SG_ST0;
 				else
 					n_state <= c_state + 1;
@@ -169,7 +185,7 @@ begin
 			sel_r <= '0';
 			en_r <= '1';
 			en_q <= '1';
-		elsif c_state>SG_ST1 and c_state<DATA_SIZE+1 then
+		elsif c_state>SG_ST1 and c_state<STAGE then
 			en_input <= '0';
 			sel_r <= '1';
 			en_r <= '1';

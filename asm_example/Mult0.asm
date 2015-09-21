@@ -14,6 +14,7 @@ sw 1(r0), r1
 addui r2, r0, 65535
 lw r3, 1(r0)
 mult r4, r3, r2
+multu r4, r3, r2
 mult r5, r4, r3
 fine:
 j fine

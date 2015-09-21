@@ -174,10 +174,10 @@ begin
 	-- NEXT STATE GENERATOR
 	P_NSG4: process(sig_mul, sig_ral, c_state_mul)
 	begin
-		if (sig_mul='1') and (sig_ral='0') and ((c_state_mul=SG_ST0) or (c_state_mul=MUL_STAGE+1)) then
+		if (sig_mul='1') and (sig_ral='0') and ((c_state_mul=SG_ST0) or (c_state_mul=MUL_STAGE)) then
 			n_state_mul<=SG_ST1;
 		else
-			if c_state_mul = SG_ST0 or c_state_mul >= MUL_STAGE+1 then
+			if c_state_mul = SG_ST0 or c_state_mul >= MUL_STAGE then
 				n_state_mul <= SG_ST0;
 			else
 				n_state_mul <= c_state_mul + 1;
@@ -192,11 +192,11 @@ begin
 			s_mul <= "00000";
 		elsif c_state_mul=SG_ST1 then
 			 s_mul <= "11110";
-		elsif c_state_mul>SG_ST1 and c_state_mul<MUL_STAGE then
+		elsif c_state_mul>SG_ST1 and c_state_mul<MUL_STAGE-1 then
 			s_mul <= "11111";
-		elsif c_state_mul=MUL_STAGE then
+		elsif c_state_mul=MUL_STAGE-1 then
 			s_mul <= "00011";
-		elsif c_state_mul=MUL_STAGE+1 then
+		elsif c_state_mul=MUL_STAGE then
 			s_mul <= "00001";
 		else
 			s_mul <= "00000";
@@ -219,10 +219,10 @@ begin
 	-- NEXT STATE GENERATOR
 	P_NSG6: process(sig_div, sig_ral, c_state_div)
 	begin
-		if (sig_div='1') and (sig_ral='0') and ((c_state_div=SG_ST0)or (c_state_div=DIV_STAGE+1)) then
+		if (sig_div='1') and (sig_ral='0') and ((c_state_div=SG_ST0)or (c_state_div=DIV_STAGE)) then
 			n_state_div<=SG_ST1;
 		else
-			if c_state_div = SG_ST0 or c_state_div >= DIV_STAGE+1 then
+			if c_state_div = SG_ST0 or c_state_div >= DIV_STAGE then
 				n_state_div <= SG_ST0;
 			else
 				n_state_div <= c_state_div + 1;
@@ -237,11 +237,11 @@ begin
 			s_div <= "00000";
 		elsif c_state_div=SG_ST1 then
 			 s_div <= "11110";
-		elsif c_state_div>SG_ST1 and c_state_div<DIV_STAGE then
+		elsif c_state_div>SG_ST1 and c_state_div<DIV_STAGE-1 then
 			s_div <= "11111";
-		elsif c_state_div=DIV_STAGE then
+		elsif c_state_div=DIV_STAGE-1 then
 			s_div <= "00011";
-		elsif c_state_div=DIV_STAGE+1 then
+		elsif c_state_div=DIV_STAGE then
 			s_div <= "00001";
 		else
 			s_div <= "00000";
@@ -313,10 +313,10 @@ begin
 			stall_flag_tmp := stall_flag_tmp or "11000";
 		end if;
 		
-		if (sig_mul='1') and (sig_ral='0') and ((c_state_mul=SG_ST0) or (c_state_mul=MUL_STAGE+1)) then
+		if (sig_mul='1') and (sig_ral='0') and ((c_state_mul=SG_ST0) or (c_state_mul=MUL_STAGE)) then
 			stall_flag_tmp := stall_flag_tmp or "11100";
 		end if;
-		if (sig_div='1') and (sig_ral='0') and ((c_state_div=SG_ST0) or (c_state_div=DIV_STAGE+1)) then
+		if (sig_div='1') and (sig_ral='0') and ((c_state_div=SG_ST0) or (c_state_div=DIV_STAGE)) then
 			stall_flag_tmp := stall_flag_tmp or "11100";
 		end if;
 		
