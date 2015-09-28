@@ -40,6 +40,7 @@ entity ControlUnit is
 		sig_ral	: in std_logic;
 		sig_mul	: in std_logic;
 		sig_div	: in std_logic;
+		sig_sqrt: in std_logic;
 		cw		: out std_logic_vector(CWRD_SIZE-1 downto 0);
 		calu	: out std_logic_vector(CALU_SIZE-1 downto 0)
 	);
@@ -78,8 +79,9 @@ architecture control_unit_arch of ControlUnit is
 			sig_ral			: in std_logic := '0';		-- from DataPath
 			sig_bpw			: in std_logic := '0';		-- from Branch
 			sig_jral		: in std_logic := '0';		-- from DataPath
-			sig_mul			: in std_logic := '0';		-- from CwGenerator
-			sig_div			: in std_logic := '0';		-- from CwGenerator
+			sig_mul			: in std_logic := '0';		-- from DataPath
+			sig_div			: in std_logic := '0';		-- from DataPath
+			sig_sqrt		: in std_logic := '0';		-- from DataPath
 			stall_flag		: out std_logic_vector(4 downto 0):=(others=>'0')
 		);
 	end component;	
@@ -114,7 +116,7 @@ begin
 	
 	S_GEN: StallGenerator
 	generic map(CWRD_SIZE)
-	port map(rst, clk, sig_ral, sig_bpw_tmp, sig_jral, sig_mul, sig_div, stall_flag);
+	port map(rst, clk, sig_ral, sig_bpw_tmp, sig_jral, sig_mul, sig_div, sig_sqrt, stall_flag);
 	
 	BR	: Branch
 	generic map(DATA_SIZE, OPCD_SIZE, ADDR_SIZE)

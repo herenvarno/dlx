@@ -25,7 +25,7 @@
 -- 01001 -- [MULT] Multiply -- IN MUL MODULE
 -- 01010 -- [DIVU] Unsigned Division -- IN DIV MODULE
 -- 01011 -- [DIV] Division -- IN DIV MODULE
--- 01100 -- NOT USED
+-- 01100 -- [SQRT] Square root -- IN DIV MODULE
 -- 01101 -- NOT USED
 -- 01110 -- NOT USED
 -- 01111 -- NOT USED

@@ -286,6 +286,8 @@ begin
 				calu2 <= OP_DIVU;
 			elsif (func=FUNC_DIV) then						-- DIV
 				calu2 <= OP_DIV;
+			elsif (func=FUNC_SQRT) then						-- SQRT
+				calu2 <= OP_SQRT;
 			end if;
 		elsif (opcd=OPCD_ADDI) or (opcd=OPCD_ADDUI) then	-- ADD
 			calu2 <= OP_ADD;

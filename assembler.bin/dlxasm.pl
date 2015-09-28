@@ -117,6 +117,7 @@ if ($srcfile =~ /^(.*)\.dlx$/) {
   "gtd"   => "f2,0x1b",
   "led"   => "f2,0x1c",
   "ged"   => "f2,0x1d",
+  "sqrt"  => "f,0x20",	# SQRT
 # General instructions
   "j"    => "j,0x02",
   "jal"  => "j,0x03",

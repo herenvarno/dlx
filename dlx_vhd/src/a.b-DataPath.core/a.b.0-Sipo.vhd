@@ -43,13 +43,17 @@ begin
 		end if;
 	end process;
 	
-	data(0) <= din;
+	data(0) <= din and rst;
 	GE0: for i in 0 to DATA_SIZE-2 generate
 	begin
 		PROC1: process(rst, en, clk, data(i))
 		begin
-			if rst='1' and en='1' and rising_edge(clk) then
-				data(i+1) <= data(i);
+			if rising_edge(clk) then
+				if en='1' and rst='1' then
+					data(i+1) <= data(i);
+				elsif rst='0' then
+					data(i+1) <= '0';
+				end if;
 			end if;
 		end process;
 	end generate;

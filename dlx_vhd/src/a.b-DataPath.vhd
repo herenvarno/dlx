@@ -48,7 +48,8 @@ entity DataPath is
   		sig_jral	: out std_logic:='0';
   		sig_ral		: out std_logic:='0';
   		sig_mul		: out std_logic:='0';
-  		sig_div		: out std_logic:='0'
+  		sig_div		: out std_logic:='0';
+  		sig_sqrt	: out std_logic:='0'
   	);
 end DataPath;
 
@@ -160,7 +161,8 @@ architecture data_path_arch of DataPath is
 	component Div is
 		generic (
 			DATA_SIZE	: integer := C_SYS_DATA_SIZE;
-			STAGE		: integer := C_DIV_STAGE
+			DIV_STAGE	: integer := C_DIV_STAGE;
+			SQRT_STAGE	: integer := C_SQRT_STAGE
 		);
 		port (
 			rst: in std_logic;
@@ -168,6 +170,7 @@ architecture data_path_arch of DataPath is
 			en: in std_logic:='0';
 			lock: in std_logic:='0';
 			sign: in std_logic:='0';
+			func: in std_logic:='0';
 			a : in std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');	-- Data A
 			b : in std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');	-- Data B
 			o : out std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0')	-- Data Out
@@ -229,9 +232,10 @@ architecture data_path_arch of DataPath is
 	constant REG_ADDR_SIZE : integer := MyLog2Ceil(REG_NUM);
 	constant MUL_STAGE : integer := C_MUL_STAGE;
 	constant DIV_STAGE : integer := C_DIV_STAGE;
+	constant SQRT_STAGE : integer := C_SQRT_STAGE;
 	
 	-- Program Counters
-	signal s1_pc, s2_pc, s1_jpc, s2_jpc, s1_npc, s2_npc, s2_fpc: std_logic_vector(ADDR_SIZE-1 downto 0):= (others=>'0');
+	signal s1_pc, s2_pc, s1_jpc, s2_jpc, s1_npc, s2_npc: std_logic_vector(ADDR_SIZE-1 downto 0):= (others=>'0');
 	signal s1_4 : std_logic_vector(DATA_SIZE-1 downto 0) := (2 => '1', others => '0');
 	
 	-- Instruction
@@ -239,7 +243,7 @@ architecture data_path_arch of DataPath is
 	
 	-- Register File
 	signal s2_rf_en : std_logic:='0';
-	signal s2_rd1_addr, s3_rd1_addr, s2_rd2_addr, s3_rd2_addr, s4_rd2_addr, s2_wr_addr, s2_wr_addr_r, s2_wr_addr_i, s3_wr_addr, s4_wr_addr, s5_wr_addr : std_logic_vector(REG_ADDR_SIZE-1 downto 0):=(others=>'0');
+	signal s2_rd1_addr, s3_rd1_addr, s2_rd2_addr, s3_rd2_addr, s4_rd2_addr, s2_wr_addr, s2_wr_addr_r, s2_wr_addr_i, s3_wr_addr, s4_wr_addr, s5_wr_addr, s6_wr_addr : std_logic_vector(REG_ADDR_SIZE-1 downto 0):=(others=>'0');
 	signal s2_wr_addr_sel: std_logic:='0';
 	
 	-- ALU operands
@@ -247,14 +251,13 @@ architecture data_path_arch of DataPath is
 	signal s2_imm_i : std_logic_vector(IMME_SIZE-1 downto 0):=(others=>'0');
 	signal s2_imm_j : std_logic_vector(ISTR_SIZE-OPCD_SIZE-1 downto 0):=(others=>'0');
 	signal s2_imm_l_ext, s2_imm_h_ext, s2_imm_j_ext, s2_imm_i_ext, s3_imm_i_ext : std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
-	signal s3_fwd_valid : std_logic;
 	signal s3_a_keep, s3_b_keep, s3_a_sel, s3_b_fwd, s3_b_sel, s4_b_fwd : std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
-	signal s3_mul_op, s3_div_op : std_logic:='0';
+	signal s3_mul_op, s3_div_op, s3_sqrt_op, s3_div_sqrt_op : std_logic:='0';
 	signal s3_exe_sel : std_logic_vector(1 downto 0):= "00";
 	signal s3_alu_out, s3_mul_out, s3_div_out, s3_exe_out, s4_exe_out : std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
 	signal s3_mul_lock, s3_div_lock, s3_mul_sign, s3_div_sign:std_logic:='0';
 	signal s4_mem_in, s4_mem_out : std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
-	signal s4_result, s5_result : std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
+	signal s4_result, s5_result, s6_result : std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
 	signal s3_reg_a_wait, s3_reg_b_wait: std_logic:='0';
 	
 	signal s2_jump_addr_imm, s2_jump_addr_rel, s2_jump_addr_reg:std_logic_vector(ADDR_SIZE-1 downto 0):=(others=>'0');
@@ -267,6 +270,8 @@ architecture data_path_arch of DataPath is
 	signal s2_jump_test:std_logic_vector(ADDR_SIZE-1 downto 0):=(others=>'0');
 	
 	signal s2_pc_sel, s2_pc_notsel, s3_pc_notsel:std_logic_vector(ADDR_SIZE-1 downto 0):=(others=>'0');
+	
+	signal s6_en_wb: std_logic:='0';
 	
 begin
 	-- PIPELINE STATE 1 : [IF]
@@ -512,8 +517,8 @@ begin
 	port map(rst, clk, s3_mul_op, s3_mul_lock, s3_mul_sign, s3_a_sel(DATA_SIZE/2-1 downto 0), s3_b_sel(DATA_SIZE/2-1 downto 0), s3_mul_out);
 	
 	DIV0: Div
-	generic map(DATA_SIZE, DIV_STAGE)
-	port map(rst, clk, s3_div_op, s3_div_lock, s3_div_sign, s3_a_sel, s3_b_sel, s3_div_out);
+	generic map(DATA_SIZE, DIV_STAGE, SQRT_STAGE)
+	port map(rst, clk, s3_div_sqrt_op, s3_div_lock, s3_div_sign, s3_sqrt_op, s3_a_sel, s3_b_sel, s3_div_out);
 	
 	----------------------------------------------------------------------------
 	-- FIXME
@@ -523,7 +528,10 @@ begin
 	sig_mul <= s3_mul_op;
 	s3_div_op <= '1' when calu="01010" or calu="01011" else '0';
 	sig_div <= s3_div_op;
-	s3_exe_sel <= s3_div_op & s3_mul_op;
+	s3_sqrt_op <= '1' when calu="01100" else '0';
+	sig_sqrt <= s3_sqrt_op;
+	s3_div_sqrt_op <= s3_div_op or s3_sqrt_op;
+	s3_exe_sel <= s3_div_sqrt_op & s3_mul_op;
 	s3_mul_sign <= '1' when calu="01001" else '0';
 	s3_div_sign <= '1' when calu="01011" else '0';
 	s3_div_lock <= (s3_reg_a_wait or s3_reg_b_wait);
@@ -587,9 +595,9 @@ begin
 	
 	ld_a_out <= s4_mem_out;
 	
-	FWDMUX_BB: FwdMux1
+	FWDMUX_BB: FwdMux2
 	generic map(DATA_SIZE, REG_ADDR_SIZE)
-	port map(s4_b_fwd, s5_result, s4_rd2_addr, s5_wr_addr, cw(CW_S5_EN_WB), '0', s4_mem_in, open);
+	port map(s4_b_fwd, s5_result, s6_result, s4_rd2_addr, s5_wr_addr, s6_wr_addr, cw(CW_S5_EN_WB), s6_en_wb, '0', '0', cw(CW_S4_DRAM_WR), s4_mem_in, open, open);
 	
 	MUX_RESULT: Mux
 	generic map(DATA_SIZE)
@@ -606,5 +614,25 @@ begin
 	
 	-- PIPELINE STAGE 5 : [WB]
 	-- No component needed in pipeline 5, because every operation happens in Register File.
+	-- DELAY s5_result is to forwarding for STORE;
+	-- REGISTERS : [WB]||[EXTRA STAGE]
+	REG_RESULT5: Reg
+	generic map(DATA_SIZE)
+	port map(rst, cw(CW_S5_EN_WB), clk, s5_result, s6_result);
+	
+	REG_WR5: Reg
+	generic map(REG_ADDR_SIZE)
+	port map(rst, cw(CW_S5_EN_WB), clk, s5_wr_addr, s6_wr_addr);
+	
+	REG5:process(rst, clk)
+	begin
+		if rst='0' then
+			s6_en_wb <= '0';
+		else
+			if rising_edge(clk) and cw(CW_S5_EN_WB)='1' then
+				s6_en_wb <= '1';
+			end if;
+		end if;
+	end process;
 	
 end data_path_arch;

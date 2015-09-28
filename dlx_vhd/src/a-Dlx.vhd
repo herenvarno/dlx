@@ -4,7 +4,7 @@
 -- 
 -- Author:
 -- Create: 2015-05-24
--- Update: 2015-09-20
+-- Update: 2015-09-28
 -- Status: TESTED
 --------------------------------------------------------------------------------
 
@@ -49,6 +49,7 @@ architecture dlx_arch of Dlx is
 			sig_ral	: in std_logic;
 			sig_mul	: in std_logic;
 			sig_div	: in std_logic;
+			sig_sqrt: in std_logic;
 			cw		: out std_logic_vector(CWRD_SIZE-1 downto 0);
 			calu	: out std_logic_vector(CALU_SIZE-1 downto 0)
 		);
@@ -117,7 +118,8 @@ architecture dlx_arch of Dlx is
 	  		sig_jral	: out std_logic:='0';
 	  		sig_ral		: out std_logic:='0';
 	  		sig_mul		: out std_logic:='0';
-	  		sig_div		: out std_logic:='0'
+	  		sig_div		: out std_logic:='0';
+	  		sig_sqrt	: out std_logic:='0'
 	  	);
 	end component;
 
@@ -151,11 +153,12 @@ architecture dlx_arch of Dlx is
 	signal sig_ral	: std_logic:='0';
 	signal sig_mul	: std_logic:='0';
 	signal sig_div	: std_logic:='0';
+	signal sig_sqrt	: std_logic:='0';
 	
 begin
 	CU0: ControlUnit
 	generic map(ISTR_SIZE, DATA_SIZE, OPCD_SIZE, FUNC_SIZE, CWRD_SIZE, CALU_SIZE)
-	port map(clk, rst, ir, pc, reg_a_val, ld_a_val, sig_bal, sig_bpw, sig_jral, sig_ral, sig_mul, sig_div, cw, calu);
+	port map(clk, rst, ir, pc, reg_a_val, ld_a_val, sig_bal, sig_bpw, sig_jral, sig_ral, sig_mul, sig_div, sig_sqrt, cw, calu);
 	
 	IR0: InstructionRam
 	generic map(ADDR_SIZE, ISTR_SIZE)
@@ -167,6 +170,6 @@ begin
 	
 	DP0: DataPath
 	generic map(ADDR_SIZE, DATA_SIZE, ISTR_SIZE, OPCD_SIZE, IMME_SIZE, CWRD_SIZE, CALU_SIZE, DRCW_SIZE)
-	port map(clk, rst, pc_bus, ir_bus, ir, pc, reg_a_val, ld_a_val, addr_bus, do_bus, di_bus, cw, dr_cw, calu, sig_bal, sig_bpw, sig_jral, sig_ral, sig_mul, sig_div);
+	port map(clk, rst, pc_bus, ir_bus, ir, pc, reg_a_val, ld_a_val, addr_bus, do_bus, di_bus, cw, dr_cw, calu, sig_bal, sig_bpw, sig_jral, sig_ral, sig_mul, sig_div, sig_sqrt);
 	
 end dlx_arch;

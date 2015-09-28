@@ -24,6 +24,7 @@ package Consts is
 	constant C_ADD_SPARSITY		: integer	:= 4;			-- Sparsity of Adder carray generator
 	constant C_MUL_STAGE		: integer	:= 10;			-- Stage of multiply operation
 	constant C_DIV_STAGE		: integer	:= 34;			-- Stage of division operation
+	constant C_SQRT_STAGE		: integer	:= 18;			-- Stage of square root operation
 	constant C_REG_NUM			: integer	:= 32;			-- Number of Register in Register File
 	constant C_REG_GLOBAL_NUM	: integer	:= 8;			-- Number of Global register in register file
 	constant C_REG_GENERAL_NUM	: integer	:= 8;			-- Number of General registers (I/L/O) in register file
@@ -44,6 +45,7 @@ package Consts is
 	constant OP_MULT	: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "01001";	--0x09	-- signed
 	constant OP_DIVU	: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "01010";	--0x0a	-- unsigned
 	constant OP_DIV		: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "01011";	--0x0b	-- signed
+	constant OP_SQRT	: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "01100";	--0x0c	-- SQRT unsigned
 	constant OP_SUB		: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "10000";	--0x10
 	constant OP_SGT		: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "10001";	--0x11
 	constant OP_SGE		: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "10010";	--0x12
@@ -119,13 +121,10 @@ package Consts is
 	constant OPCD_SGEUI	: std_logic_vector(C_SYS_OPCD_SIZE-1 downto 0) := "111101";	--0x3d
 	
 	-- Instructions --FUNC
+	-- R TYPE
 	constant FUNC_SLL	: std_logic_vector(C_SYS_FUNC_SIZE-1 downto 0) := "00000000100";	--0x04
 	constant FUNC_SRL	: std_logic_vector(C_SYS_FUNC_SIZE-1 downto 0) := "00000000110";	--0x06
 	constant FUNC_SRA	: std_logic_vector(C_SYS_FUNC_SIZE-1 downto 0) := "00000000111";	--0x07
-	constant FUNC_MULT	: std_logic_vector(C_SYS_FUNC_SIZE-1 downto 0) := "00000001110";	--0x0e
-	constant FUNC_DIV	: std_logic_vector(C_SYS_FUNC_SIZE-1 downto 0) := "00000001111";	--0x0f
-	constant FUNC_MULTU	: std_logic_vector(C_SYS_FUNC_SIZE-1 downto 0) := "00000010110";	--0x16
-	constant FUNC_DIVU	: std_logic_vector(C_SYS_FUNC_SIZE-1 downto 0) := "00000010111";	--0x17
 	constant FUNC_ADD	: std_logic_vector(C_SYS_FUNC_SIZE-1 downto 0) := "00000100000";	--0x20
 	constant FUNC_ADDU	: std_logic_vector(C_SYS_FUNC_SIZE-1 downto 0) := "00000100001";	--0x21
 	constant FUNC_SUB	: std_logic_vector(C_SYS_FUNC_SIZE-1 downto 0) := "00000100010";	--0x22
@@ -143,6 +142,12 @@ package Consts is
 	constant FUNC_SGTU	: std_logic_vector(C_SYS_FUNC_SIZE-1 downto 0) := "00000111011";	--0x3b
 	constant FUNC_SLEU	: std_logic_vector(C_SYS_FUNC_SIZE-1 downto 0) := "00000111100";	--0x3c
 	constant FUNC_SGEU	: std_logic_vector(C_SYS_FUNC_SIZE-1 downto 0) := "00000111101";	--0x3d
+	-- F TYPE
+	constant FUNC_MULT	: std_logic_vector(C_SYS_FUNC_SIZE-1 downto 0) := "00000001110";	--0x0e
+	constant FUNC_DIV	: std_logic_vector(C_SYS_FUNC_SIZE-1 downto 0) := "00000001111";	--0x0f
+	constant FUNC_MULTU	: std_logic_vector(C_SYS_FUNC_SIZE-1 downto 0) := "00000010110";	--0x16
+	constant FUNC_DIVU	: std_logic_vector(C_SYS_FUNC_SIZE-1 downto 0) := "00000010111";	--0x17
+	constant FUNC_SQRT	: std_logic_vector(C_SYS_FUNC_SIZE-1 downto 0) := "00000100000";	--0x20
 	
 	-- STALL GENERATOR STATES
 	constant SG_ST0		: integer := 0;

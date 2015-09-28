@@ -4,7 +4,7 @@
 --
 -- Author:
 -- Create: 2015-07-29
--- Update: 2015-09-20
+-- Update: 2015-09-28
 -- Status: TESTED
 --------------------------------------------------------------------------------
 
@@ -25,8 +25,9 @@ entity StallGenerator is
 		sig_ral			: in std_logic := '0';		-- from DataPath
 		sig_bpw			: in std_logic := '0';		-- from Branch
 		sig_jral		: in std_logic := '0';		-- from DataPath
-		sig_mul			: in std_logic := '0';		-- from CwGenerator
-		sig_div			: in std_logic := '0';		-- from CwGenerator
+		sig_mul			: in std_logic := '0';		-- from DataPath
+		sig_div			: in std_logic := '0';		-- from DataPath
+		sig_sqrt		: in std_logic := '0';		-- from DataPath
 		stall_flag		: out std_logic_vector(4 downto 0):=(others=>'0')
 	);
 end StallGenerator;
@@ -40,6 +41,7 @@ architecture stall_generator_arch of StallGenerator is
 	signal s_jral: std_logic_vector(4 downto 0) := "00000"; 
 	signal s_mul : std_logic_vector(4 downto 0) := "00000";
 	signal s_div : std_logic_vector(4 downto 0) := "00000";
+	signal s_sqrt: std_logic_vector(4 downto 0) := "00000";
 	signal s_stu : std_logic_vector(4 downto 0) := "11111";
 	
 	signal c_state_ral, n_state_ral : integer := SG_ST0;
@@ -47,10 +49,12 @@ architecture stall_generator_arch of StallGenerator is
 	signal c_state_jral, n_state_jral : integer := SG_ST0;
 	signal c_state_mul, n_state_mul : integer := SG_ST0;
 	signal c_state_div, n_state_div : integer := SG_ST0;
+	signal c_state_sqrt, n_state_sqrt : integer := SG_ST0;
 	signal c_state_stu, n_state_stu : integer := SG_ST0;
 	
 	constant MUL_STAGE : integer := C_MUL_STAGE;
 	constant DIV_STAGE : integer := C_DIV_STAGE;
+	constant SQRT_STAGE : integer := C_SQRT_STAGE;
 begin
 	-- A OR B WAIT SIGNAL
 	-- NEXT STATE GENERATOR
@@ -260,6 +264,51 @@ begin
 		end if;
 	end process;
 	
+	-- SQRT SIGNAL
+	-- NEXT STATE GENERATOR
+	P_NSG7: process(sig_sqrt, sig_ral, c_state_sqrt)
+	begin
+		if (sig_sqrt='1') and (sig_ral='0') and ((c_state_sqrt=SG_ST0)or (c_state_sqrt=SQRT_STAGE)) then
+			n_state_sqrt<=SG_ST1;
+		else
+			if c_state_sqrt = SG_ST0 or c_state_sqrt >= SQRT_STAGE then
+				n_state_sqrt <= SG_ST0;
+			else
+				n_state_sqrt <= c_state_sqrt + 1;
+			end if;
+		end if;
+	end process;
+	
+	-- OUTPUT GENERATOR
+	P_OUT7: process(c_state_sqrt)
+	begin
+		if c_state_sqrt=SG_ST0 then
+			s_sqrt <= "00000";
+		elsif c_state_sqrt=SG_ST1 then
+			 s_sqrt <= "11110";
+		elsif c_state_sqrt>SG_ST1 and c_state_sqrt<SQRT_STAGE-1 then
+			s_sqrt <= "11111";
+		elsif c_state_sqrt=SQRT_STAGE-1 then
+			s_sqrt <= "00011";
+		elsif c_state_sqrt=SQRT_STAGE then
+			s_sqrt <= "00001";
+		else
+			s_sqrt <= "00000";
+		end if;
+	end process;
+
+	-- NEXT STATE REGISTER
+	P_REG7: process(rst, clk)
+	begin
+		if rst='0' then
+			c_state_sqrt <= SG_ST0;
+		else
+			if rising_edge(clk) then
+				c_state_sqrt <= n_state_sqrt;
+			end if;
+		end if;
+	end process;
+	
 	-- START UP
 	-- NEXT STATE GENERATOR
 	P_NSG5: process(c_state_stu)
@@ -297,10 +346,10 @@ begin
 		end if;
 	end process;
 	
-	P_FIN: process(s_ral, s_bpw, s_mul, s_div, s_stu, sig_ral, sig_bpw, sig_jral, sig_mul, sig_div, c_state_mul)
+	P_FIN: process(s_ral, s_bpw, s_mul, s_div, s_sqrt, s_stu, sig_ral, sig_bpw, sig_jral, sig_mul, sig_div, sig_sqrt, c_state_mul, c_state_div, c_state_sqrt)
 		variable stall_flag_tmp: std_logic_vector(4 downto 0);
 	begin
-		stall_flag_tmp := s_ral or s_bpw or s_mul or s_div or s_stu;
+		stall_flag_tmp := s_ral or s_bpw or s_mul or s_div or s_sqrt or s_stu;
 		if (sig_ral='1') then
 			stall_flag_tmp := stall_flag_tmp or "11100";
 		end if;
@@ -317,6 +366,9 @@ begin
 			stall_flag_tmp := stall_flag_tmp or "11100";
 		end if;
 		if (sig_div='1') and (sig_ral='0') and ((c_state_div=SG_ST0) or (c_state_div=DIV_STAGE)) then
+			stall_flag_tmp := stall_flag_tmp or "11100";
+		end if;
+		if (sig_sqrt='1') and (sig_ral='0') and ((c_state_sqrt=SG_ST0) or (c_state_sqrt=SQRT_STAGE)) then
 			stall_flag_tmp := stall_flag_tmp or "11100";
 		end if;
 		
