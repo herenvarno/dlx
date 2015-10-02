@@ -4,7 +4,7 @@
 --
 -- Author:
 -- Create: 2015-05-24
--- Update: 2015-09-20
+-- Update: 2015-10-03
 -- Status: TESTED
 --------------------------------------------------------------------------------
 
@@ -239,7 +239,7 @@ architecture data_path_arch of DataPath is
 	signal s1_4 : std_logic_vector(DATA_SIZE-1 downto 0) := (2 => '1', others => '0');
 	
 	-- Instruction
-	signal s1_istr, s2_istr : std_logic_vector(ISTR_SIZE-1 downto 0):= (others=>'0');
+	signal s2_istr : std_logic_vector(ISTR_SIZE-1 downto 0):= (others=>'0');
 	
 	-- Register File
 	signal s2_rf_en : std_logic:='0';
@@ -276,7 +276,6 @@ architecture data_path_arch of DataPath is
 begin
 	-- PIPELINE STATE 1 : [IF]
 	istr_addr <= s1_pc;	-- to IRAM
-	s1_istr <= istr_val;	-- from IRAM
 	
 	-- NPC=PC+4
 	ADD_4: Adder
@@ -292,15 +291,12 @@ begin
 	generic map (ADDR_SIZE)
 	port map (rst, cw(CW_S1_LATCH), clk, s1_pc, s2_pc);
 	
-	REG_IR: Reg
-	generic map (ISTR_SIZE)
-	port map (rst, cw(CW_S1_LATCH), clk, s1_istr, s2_istr);
-	
 	REG_NPC: Reg
 	generic map (ADDR_SIZE)
 	port map (rst, cw(CW_S1_LATCH), clk, s1_npc, s2_npc);
 	
 	-- PIPELINE STAGE 2: [ID]
+	s2_istr <= istr_val; -- from IRAM
 	ir_out <= s2_istr;	-- to Control Unit
 	pc_out <= s2_pc;
 	

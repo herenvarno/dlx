@@ -4,7 +4,7 @@
 --
 -- Author:
 -- Create: 2015-09-09
--- Update: 2015-09-20
+-- Update: 2015-10-03
 -- Status: TESTED
 --------------------------------------------------------------------------------
 
@@ -99,7 +99,7 @@ architecture div_arch of Div is
 	signal en_input, sel_r, en_r, en_q : std_logic:='0';
 	signal c_state, n_state : integer:=0;
 	signal inv_a_flag, inv_b_flag, inv_q_flag, inv_q_flag_mod : std_logic:='0';
-	signal o_div, o_sqrt: std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
+--	signal o_div, o_sqrt: std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
 	signal local_rst, reg_rst : std_logic:='1';
 	
 begin
@@ -171,11 +171,11 @@ begin
 	-- NEG q IF NEEDED (FOR DIV)
 	ADJUST: AddSub
 	generic map(DATA_SIZE)
-	port map(inv_q_flag_mod, (q'range=>'0'), q, o_div, open);
+	port map(inv_q_flag_mod, (q'range=>'0'), q, o, open);
 	-- MASK HIGH 16 bits to '0' (FOR SQRT)
-	o_sqrt <= q and x"0000ffff";
+--	o_sqrt <= q and x"0000ffff";
 	-- CHOOSE OUTPUT BASED ON func
-	o <= o_sqrt when func='1' else o_div;
+--	o <= o_sqrt when func='1' else o_div;
 	
 
 	-- Control Logic (FSM)

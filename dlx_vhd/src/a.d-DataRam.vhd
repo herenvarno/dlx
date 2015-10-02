@@ -4,8 +4,8 @@
 --
 -- Author:
 -- Create: 2015-05-24
--- Update: 2015-08-13
--- Status: UNFINISHED
+-- Update: 2015-10-03
+-- Status: TESTED
 --
 -- NOTE 1:
 -- Control Word:

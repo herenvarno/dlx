@@ -9,7 +9,7 @@ shift:
 srli r3, r3, 1
 bnez r3, shift
 
-addui r1, r0, 65535
+addi r1, r0, 65535
 sw 1(r0), r1
 addui r2, r0, 65535
 lw r3, 1(r0)

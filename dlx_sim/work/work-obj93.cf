@@ -1,0 +1,102 @@
+v 3
+file . "../../dlx_vhd/tb/a-tbDlx.vhd" "20151002222048.000" "20151003005751.519":
+  entity tbdlx at 11( 285) + 0 on 75;
+  architecture tb_dlx_arch of tbdlx at 24( 721) + 0 on 76;
+  configuration tb_dlx_cfg at 52( 1340) + 0 on 77;
+file . "../../dlx_vhd/src/a.d-DataRam.vhd" "20151002224743.000" "20151003005751.380":
+  entity dataram at 20( 575) + 0 on 71;
+  architecture data_ram_arch of dataram at 50( 1607) + 0 on 72;
+file . "../../dlx_vhd/src/a.b-DataPath.vhd" "20151002224659.000" "20151003005750.799":
+  entity datapath at 11( 282) + 0 on 67;
+  architecture data_path_arch of datapath at 59( 2322) + 0 on 68;
+file . "../../dlx_vhd/src/a.b-DataPath.core/a.b.f-Mul.vhd" "20150921194603.000" "20151003005750.591":
+  entity mul at 11( 272) + 0 on 63;
+  architecture mul_arch_struct of mul at 39( 1174) + 0 on 64;
+file . "../../dlx_vhd/src/a.b-DataPath.core/a.b.f-Mul.core/a.b.f.0-BoothEncoder.vhd" "20151002225147.000" "20151003005750.350":
+  entity boothencoder at 17( 397) + 0 on 59;
+  architecture booth_encoder_arch of boothencoder at 35( 971) + 0 on 60;
+file . "../../dlx_vhd/src/a.b-DataPath.core/a.b.e-FwdMux2.vhd" "20151002225105.000" "20151003005750.262":
+  entity fwdmux2 at 11( 307) + 0 on 55;
+  architecture fwd_mux_2_arch of fwdmux2 at 45( 1480) + 0 on 56;
+file . "../../dlx_vhd/src/a.b-DataPath.core/a.b.b-Extender.vhd" "20150610211731.000" "20151003005750.167":
+  entity extender at 11( 311) + 0 on 51;
+  architecture extender_arch of extender at 33( 1001) + 0 on 52;
+file . "../../dlx_vhd/src/a.b-DataPath.core/a.b.a-Alu.core/a.b.a.b-Shifter.vhd" "20150811094126.000" "20151003005749.972":
+  entity shifter at 11( 283) + 0 on 47;
+  architecture shifter_arch of shifter at 37( 1152) + 0 on 48;
+file . "../../dlx_vhd/src/a.b-DataPath.core/a.b.a-Alu.core/a.b.a.a-Adder.core/a.b.a.a.a-P4Adder.vhd" "20150527185050.000" "20151003005749.892":
+  entity p4adder at 11( 302) + 0 on 43;
+  architecture p4_adder_arch of p4adder at 35( 1029) + 0 on 44;
+file . "../../dlx_vhd/src/a.b-DataPath.core/a.b.a-Alu.core/a.b.a.a-Adder.core/a.b.a.a.0-AdderSumGenerator.vhd" "20150527185023.000" "20151003005749.684":
+  entity addersumgenerator at 11( 337) + 0 on 39;
+  architecture adder_sum_generator_arch of addersumgenerator at 33( 1073) + 0 on 40;
+file . "../../dlx_vhd/src/a.b-DataPath.core/a.b.a-Alu.core/a.b.a.a-Adder.core/a.b.a.a.0-Rca.vhd" "20150527185044.000" "20151003005749.619":
+  entity rca at 11( 287) + 0 on 35;
+  architecture rca_arch of rca at 34( 977) + 0 on 36;
+file . "../../dlx_vhd/src/a.b-DataPath.core/a.b.0-Sipo.vhd" "20151002225027.000" "20151003005749.557":
+  entity sipo at 11( 315) + 0 on 31;
+  architecture sipo_arch of sipo at 34( 956) + 0 on 32;
+file . "../../dlx_vhd/src/a.b-DataPath.core/a.b.0-Mux4.vhd" "20150530120959.000" "20151003005749.475":
+  entity mux4 at 11( 292) + 0 on 27;
+  architecture mux4_arch of mux4 at 35( 1093) + 0 on 28;
+file . "../../dlx_vhd/src/a.a-ControlUnit.vhd" "20151002224724.000" "20151003005749.395":
+  entity controlunit at 11( 289) + 0 on 23;
+  architecture control_unit_arch of controlunit at 52( 1893) + 0 on 24;
+file . "../../dlx_vhd/src/a.a-ControlUnit.core/a.a.b-StallGenerator.vhd" "20150928004242.000" "20151003005749.183":
+  entity stallgenerator at 11( 302) + 0 on 19;
+  architecture stall_generator_arch of stallgenerator at 38( 1259) + 0 on 20;
+file . "../lib/std_logic_textio.vhdl" "20150530124118.000" "20151003005748.750":
+  package std_logic_textio at 18( 593) + 0 on 15 body;
+  package body std_logic_textio at 70( 2815) + 0 on 16;
+file . "../../dlx_vhd/src/0-Funcs.vhd" "20151002224600.000" "20151003005748.715":
+  package funcs at 11( 285) + 0 on 12 body;
+  package body funcs at 26( 751) + 0 on 13;
+file . "../../dlx_vhd/src/0-Consts.vhd" "20150927230140.000" "20151003005748.687":
+  package consts at 11( 286) + 0 on 11;
+file . "../../dlx_vhd/src/0-Types.vhd" "20151002224632.000" "20151003005748.733":
+  package types at 11( 281) + 0 on 14;
+file . "../../dlx_vhd/src/a.a-ControlUnit.core/a.a.a-CwGenerator.vhd" "20150927230323.000" "20151003005748.903":
+  entity cwgenerator at 11( 291) + 0 on 17;
+  architecture cw_generator_arch of cwgenerator at 43( 1548) + 0 on 18;
+file . "../../dlx_vhd/src/a.a-ControlUnit.core/a.a.c-Branch.vhd" "20150922171841.000" "20151003005749.317":
+  entity branch at 11( 340) + 0 on 21;
+  architecture branch_arch of branch at 43( 1416) + 0 on 22;
+file . "../../dlx_vhd/src/a.b-DataPath.core/a.b.0-Mux.vhd" "20151002224956.000" "20151003005749.437":
+  entity mux at 11( 306) + 0 on 25;
+  architecture mux_arch of mux at 33( 984) + 0 on 26;
+file . "../../dlx_vhd/src/a.b-DataPath.core/a.b.0-Reg.vhd" "20151002225018.000" "20151003005749.526":
+  entity reg at 11( 313) + 0 on 29;
+  architecture reg_arch of reg at 34( 981) + 0 on 30;
+file . "../../dlx_vhd/src/a.b-DataPath.core/a.b.a-Alu.core/a.b.a.a-Adder.core/a.b.a.a.0-FullAdder.vhd" "20150527185031.000" "20151003005749.597":
+  entity fulladder at 11( 284) + 0 on 33;
+  architecture full_adder_arch of fulladder at 30( 823) + 0 on 34;
+file . "../../dlx_vhd/src/a.b-DataPath.core/a.b.a-Alu.core/a.b.a.a-Adder.core/a.b.a.a.0-AdderCarrySelect.vhd" "20150527185017.000" "20151003005749.650":
+  entity addercarryselect at 11( 330) + 0 on 37;
+  architecture adder_carry_select_arch of addercarryselect at 32( 983) + 0 on 38;
+file . "../../dlx_vhd/src/a.b-DataPath.core/a.b.a-Alu.core/a.b.a.a-Adder.core/a.b.a.a.0-P4AdderCarryGenerator.vhd" "20150527185038.000" "20151003005749.714":
+  entity p4carrygenerator at 11( 302) + 0 on 41;
+  architecture p4_carry_generator_arch of p4carrygenerator at 35( 1049) + 0 on 42;
+file . "../../dlx_vhd/src/a.b-DataPath.core/a.b.a-Alu.core/a.b.a.a-Adder.vhd" "20150527184944.000" "20151003005749.944":
+  entity adder at 11( 284) + 0 on 45;
+  architecture adder_arch of adder at 33( 937) + 0 on 46;
+file . "../../dlx_vhd/src/a.b-DataPath.core/a.b.a-Alu.vhd" "20150927222044.000" "20151003005750.027":
+  entity alu at 50( 1659) + 0 on 49;
+  architecture alu_arch of alu at 73( 2484) + 0 on 50;
+file . "../../dlx_vhd/src/a.b-DataPath.core/a.b.c-RegisterFile.vhd" "20150811094054.000" "20151003005750.204":
+  entity registerfile at 11( 319) + 0 on 53;
+  architecture register_file_arch of registerfile at 46( 1928) + 0 on 54;
+file . "../../dlx_vhd/src/a.b-DataPath.core/a.b.f-Mul.core/a.b.f.0-AddSub.vhd" "20151002225137.000" "20151003005750.299":
+  entity addsub at 11( 285) + 0 on 57;
+  architecture add_sub_arch of addsub at 34( 1052) + 0 on 58;
+file . "../../dlx_vhd/src/a.b-DataPath.core/a.b.f-Mul.core/a.b.f.a-BoothMul.vhd" "20151002225217.000" "20151003005750.398":
+  entity boothmul at 11( 285) + 0 on 61;
+  architecture booth_mul_arch of boothmul at 39( 1197) + 0 on 62;
+file . "../../dlx_vhd/src/a.b-DataPath.core/a.b.g-Div.vhd" "20151002225128.000" "20151003005750.617":
+  entity div at 11( 269) + 0 on 65;
+  architecture div_arch of div at 41( 1309) + 0 on 66;
+file . "../../dlx_vhd/src/a.c-InstructionRam.vhd" "20151002224103.000" "20151003005751.334":
+  entity instructionram at 11( 303) + 0 on 69;
+  architecture instruction_ram_arch of instructionram at 41( 1227) + 0 on 70;
+file . "../../dlx_vhd/src/a-Dlx.vhd" "20151002224128.000" "20151003005751.464":
+  entity dlx at 11( 294) + 0 on 73;
+  architecture dlx_arch of dlx at 27( 678) + 0 on 74;

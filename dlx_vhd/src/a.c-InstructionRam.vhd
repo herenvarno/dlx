@@ -4,7 +4,7 @@
 --
 -- Author:
 -- Create: 2015-05-24
--- Update: 2015-05-30
+-- Update: 2015-10-03
 -- Status: TESTED
 --------------------------------------------------------------------------------
 
@@ -28,6 +28,8 @@ entity InstructionRam is
 	);
 	port (
 		rst  : in std_logic;
+		clk  : in std_logic;
+		en   : in std_logic;
 		addr : in std_logic_vector(ADDR_SIZE-1 downto 0):=(others=>'0');
 		iout : out std_logic_vector(ISTR_SIZE-1 downto 0):=(others=>'0')
 	);
@@ -68,17 +70,19 @@ begin
 		end if;
 	end process FILL_MEM_P;
 	
-	READ_MEM_P: process (rst, addr)
+	READ_MEM_P: process (rst, clk)
 		variable index : integer := 0;
 	begin
 		if rst = '0' then
 			iout <= (others=>'0');
 		else
-			index := to_integer(unsigned(addr));
-			if index >= IRAM_SIZE then
-				index := IRAM_SIZE-4;
+			if rising_edge(clk) and en='1' then
+				index := to_integer(unsigned(addr));
+				if index >= IRAM_SIZE then
+					index := IRAM_SIZE-4;
+				end if;
+				iout <= data_area(index+3)&data_area(index+2)&data_area(index+1)&data_area(index);
 			end if;
-			iout <= data_area(index+3)&data_area(index+2)&data_area(index+1)&data_area(index);
 		end if;
 	end process READ_MEM_P;
 end instruction_ram_arch;

@@ -23,12 +23,12 @@ end tbDlx;
 --------------------------------------------------------------------------------
 architecture tb_dlx_arch of tbDlx is
 	signal clk: std_logic := '0';
-	signal rst: std_logic := '1';
+	signal rst: std_logic := '0';
 
 	component Dlx
 		port (
-			clk : in std_logic;
-			rst : in std_logic	-- Active Low
+			clk : in std_logic := '0';
+			rst : in std_logic := '0'	-- Active Low
 		);
     end component;
 begin
@@ -39,7 +39,7 @@ begin
 	-- Clock generator
 	PCLOCK : process(clk)
 	begin
-		clk <= not(clk) after 0.5 ns;	
+		clk <= not(clk) after 0.5 ns;
 	end process;
 	
 	-- Reset test

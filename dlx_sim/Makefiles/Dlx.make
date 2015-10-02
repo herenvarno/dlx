@@ -43,11 +43,9 @@ DEPENDENCE_L=\
 	$(PATH_SRC)/a.b-DataPath.core/a.b.a-Alu.vhd\
 	$(PATH_SRC)/a.b-DataPath.core/a.b.b-Extender.vhd\
 	$(PATH_SRC)/a.b-DataPath.core/a.b.c-RegisterFile.vhd\
-	$(PATH_SRC)/a.b-DataPath.core/a.b.d-FwdMux1.vhd\
 	$(PATH_SRC)/a.b-DataPath.core/a.b.e-FwdMux2.vhd\
 	$(PATH_SRC)/a.b-DataPath.core/a.b.f-Mul.core/a.b.f.0-AddSub.vhd\
 	$(PATH_SRC)/a.b-DataPath.core/a.b.f-Mul.core/a.b.f.0-BoothEncoder.vhd\
-	$(PATH_SRC)/a.b-DataPath.core/a.b.f-Mul.core/a.b.f.0-BoothGenerator.vhd\
 	$(PATH_SRC)/a.b-DataPath.core/a.b.f-Mul.core/a.b.f.a-BoothMul.vhd\
 	$(PATH_SRC)/a.b-DataPath.core/a.b.f-Mul.vhd\
 	$(PATH_SRC)/a.b-DataPath.core/a.b.g-Div.vhd\

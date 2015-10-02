@@ -4,7 +4,7 @@
 -- 
 -- Author:
 -- Create: 2015-05-24
--- Update: 2015-09-28
+-- Update: 2015-10-03
 -- Status: TESTED
 --------------------------------------------------------------------------------
 
@@ -18,9 +18,9 @@ use work.Funcs.all;
 -- ENTITY
 --------------------------------------------------------------------------------
 entity Dlx is
-	port(
-		clk	: in std_logic;
-		rst : in std_logic	-- active low
+	port (
+		clk : in std_logic := '0';
+		rst : in std_logic := '0'	-- Active Low
 	);
 end Dlx;
 
@@ -63,6 +63,8 @@ architecture dlx_arch of Dlx is
 		);
 		port (
 			rst  : in std_logic;
+			clk  : in std_logic;
+			en   : in std_logic;
 			addr : in std_logic_vector(ADDR_SIZE-1 downto 0):=(others=>'0');
 			iout : out std_logic_vector(ISTR_SIZE-1 downto 0)
 		);
@@ -162,7 +164,7 @@ begin
 	
 	IR0: InstructionRam
 	generic map(ADDR_SIZE, ISTR_SIZE)
-	port map(rst, pc_bus, ir_bus);
+	port map(rst, clk, cw(CW_S1_LATCH), pc_bus, ir_bus);
 	
 	DR0: DataRam
 	generic map(DRCW_SIZE, ADDR_SIZE, DATA_SIZE)
