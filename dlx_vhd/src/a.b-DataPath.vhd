@@ -359,20 +359,12 @@ begin
 	generic map(ISTR_SIZE-OPCD_SIZE, ADDR_SIZE)
 	port map('1', s2_imm_j, s2_imm_j_ext);
 	
-	EXT_H: process(s2_imm_i)
-	begin
-		s2_imm_h_ext(DATA_SIZE-1 downto DATA_SIZE/2) <= s2_imm_i;
-		s2_imm_h_ext(DATA_SIZE/2-1 downto 0) <= (others=>'0');
-	end process;
+	-- EXT_H
+	s2_imm_h_ext(DATA_SIZE-1 downto DATA_SIZE/2) <= s2_imm_i;
+	s2_imm_h_ext(DATA_SIZE/2-1 downto 0) <= (others=>'0');
 	
-	EXT_I: process(s2_imm_l_ext, s2_imm_h_ext, s2_istr)
-	begin
-		if s2_istr(ISTR_SIZE-1 downto ISTR_SIZE-OPCD_SIZE)=OPCD_LHI then
-			s2_imm_i_ext <= s2_imm_h_ext;
-		else
-			s2_imm_i_ext <= s2_imm_l_ext;
-		end if;
-	end process;
+	-- EXT_I final
+	s2_imm_i_ext <= s2_imm_h_ext when s2_istr(ISTR_SIZE-1 downto ISTR_SIZE-OPCD_SIZE)=OPCD_LHI else s2_imm_l_ext;
 	
 	----------------------------------------------------------------------------
 	-- NOTE:

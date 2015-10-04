@@ -66,18 +66,18 @@ architecture cw_generator_arch of CwGenerator is
 		x"41",	-- 0x09 ADDUI
 		x"11",	-- 0x0a SUBI
 		x"41",	-- 0x0b SUBUI
-		x"11",	-- 0x0c ANDI
-		x"11",	-- 0x0d ORI
-		x"11",	-- 0x0e XORI
+		x"41",	-- 0x0c ANDI
+		x"41",	-- 0x0d ORI
+		x"41",	-- 0x0e XORI
 		x"11",	-- 0x0f LHI
 		x"00",	-- 0x10	UNUSED
 		x"00",	-- 0x11 UNUSED
 		x"15",	-- 0x12	JR
 		x"19",	-- 0x13 JALR
-		x"11",	-- 0x14 SLLI
+		x"41",	-- 0x14 SLLI
 		x"1d",	-- 0x15 NOP
-		x"11",	-- 0x16 SRLI
-		x"11",	-- 0x17	SRAI
+		x"41",	-- 0x16 SRLI
+		x"41",	-- 0x17	SRAI
 		x"11",	-- 0x18 SEQI
 		x"11",	-- 0x19 SNEI
 		x"11",	-- 0x1a SLTI
