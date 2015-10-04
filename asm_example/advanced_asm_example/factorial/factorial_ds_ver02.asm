@@ -16,7 +16,8 @@ putone:
 addi r1,r0,1
 
 end:
-ret
+#ret
+jr r31
 nop
 
 begin:

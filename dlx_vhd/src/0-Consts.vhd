@@ -29,9 +29,9 @@ package Consts is
 	constant C_REG_GLOBAL_NUM	: integer	:= 8;			-- Number of Global register in register file
 	constant C_REG_GENERAL_NUM	: integer	:= 8;			-- Number of General registers (I/L/O) in register file
 	constant C_REG_WINDOW_NUM	: integer	:= 8;			-- Number of Windows in register file
-	constant C_RAM_IRAM_SIZE	: integer	:= 1024;		-- IRAM size
+	constant C_RAM_IRAM_SIZE	: integer	:= 10240;		-- IRAM size
 	constant C_RAM_DRAM_SIZE	: integer	:= 1024;		-- DRAM size
-	constant C_BPU_ADDR_SIZE	: integer	:= 8;			-- BPU ADDR SIZE
+	constant C_BPU_ADDR_SIZE	: integer	:= 2;			-- BPU ADDR SIZE
 	
 	-- ALU Operations
 	constant OP_ADD		: std_logic_vector(C_CTR_CALU_SIZE-1 downto 0) := "00000";	--0x00

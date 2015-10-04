@@ -7,13 +7,8 @@ then
 	exit -1
 fi
 if [ $1 == "clean" ];
-then
-	if [ ! -d work ];
-	then
-		mkdir work
-	fi
-	cd work		
-	rm -rf ./*
+then	
+	rm -rf work
 else
 	if [ $# == 2 ];
 	then
@@ -22,6 +17,7 @@ else
 		./assembler.sh asm_example/test.asm
 		cd dlx_sim
 	fi
+	mkdir -p work
 	cd work
 	make -f ../Makefiles/$1.make
 fi

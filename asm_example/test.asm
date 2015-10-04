@@ -1,20 +1,34 @@
-
-addi r1, r0, 6
-addi r2, r0, 7
+# BRANCH PREDITION TEST
+addi r3, r3, #10
+sw 4(r0), r3
+BEGIN:
+lw r2, 4(r0)
+subi r2, r2, #1
+sw 4(r0), r2
 nop
-mult r3, r2, r1
-addi r3, r3, 2
-shift:
+lw r1, 4(r0)
+bnez r1, BEGIN
 
-srli r3, r3, 1
-bnez r3, shift
+addi r3, r3, #10
+sw 4(r0), r3
+BEGIN1:
+lw r2, 4(r0)
+subi r2, r2, #1
+sw 4(r0), r2
+nop
+lw r1, 4(r0)
+bnez r1, BEGIN1
 
-addui r1, r0, 65535
-sw 1(r0), r1
-addui r2, r0, 65535
-lw r3, 1(r0)
-mult r4, r3, r2
-multu r4, r3, r2
-mult r5, r4, r3
-fine:
-j fine
+addi r3, r3, #10
+sw 4(r0), r3
+BEGIN2:
+lw r2, 4(r0)
+subi r2, r2, #1
+sw 4(r0), r2
+nop
+lw r1, 4(r0)
+bnez r1, BEGIN2
+
+NOOP:
+j NOOP
+

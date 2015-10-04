@@ -43,30 +43,36 @@ end Branch;
 architecture branch_arch of Branch is
 	constant BPU_ADDR_SIZE: integer:= C_BPU_ADDR_SIZE;
 	constant BPU_BHT_SIZE: integer := 2**BPU_ADDR_SIZE;
-	type Bht_t is array (0 to BPU_BHT_SIZE-1) of std_logic_vector(1 downto 0);
+	constant BPU_TAG_SIZE: integer := ADDR_SIZE-BPU_ADDR_SIZE-2;
+	type Bht_t is array (0 to BPU_BHT_SIZE-1) of std_logic_vector(BPU_TAG_SIZE+1 downto 0);
 	signal bht : Bht_t;
 
 	signal sig_brt_tmp, sig_bpw_tmp, sig_brt_delay, sig_bal_delay: std_logic:='0';
 	signal opcd_delay: std_logic_vector(OPCD_SIZE-1 downto 0):=(others=>'0');
 	signal addr_delay: std_logic_vector(ADDR_SIZE-1 downto 0):=(others=>'0');
 	signal index_r, index_r_delay : integer:= 0;
-	signal entry_r, entry_r_delay : std_logic_vector(1 downto 0);
+	signal entry_r, entry_r_delay : std_logic_vector(BPU_TAG_SIZE+1 downto 0);
 begin
 	P0: process(rst, reg_a, opcd, sig_bal)
 		variable index : integer:= 0;
-		variable entry : std_logic_vector(1 downto 0);
+		variable entry : std_logic_vector(BPU_TAG_SIZE+1 downto 0);
+		variable tag : std_logic_vector(BPU_TAG_SIZE-1 downto 0);
 	begin
 		if rst='0' then
 			sig_brt <= '0';
 			sig_brt_tmp <= '0';
 		else
 			if sig_bal='1' then
+				tag := addr(ADDR_SIZE-1 downto BPU_ADDR_SIZE+2);
 				index := to_integer(unsigned(addr(BPU_ADDR_SIZE+1 downto 2)));
-				entry := bht(index_r);
-				index_r <= index;
-				entry_r <= entry;
+				entry := bht(index);
+				if tag /= entry(BPU_TAG_SIZE+1 downto 2) then	-- TAG NOT MATCH --replace
+					entry := tag & "00";
+				end if;
 				sig_brt <= entry(1);
 				sig_brt_tmp <= entry(1);
+				index_r <= index;
+				entry_r <= entry;
 			else
 				if ((reg_a=(reg_a'range=>'0')) and (opcd=OPCD_BEQZ)) or ((reg_a/=(reg_a'range=>'0')) and (opcd=OPCD_BNEZ)) then
 					sig_brt <= '1';
@@ -81,7 +87,8 @@ begin
 	
 	P1: process(rst, ld_a, opcd_delay, sig_bal_delay)
 		variable index : integer:= 0;
-		variable entry : std_logic_vector(1 downto 0);
+		variable entry : std_logic_vector(BPU_TAG_SIZE+1 downto 0);
+		variable val : std_logic_vector(1 downto 0);
 	begin
 		if rst='0' then
 			for i in 0 to BPU_BHT_SIZE-1 loop
@@ -91,7 +98,7 @@ begin
 			sig_bpw_tmp <= '0';
 		else
 			if sig_bal_delay='1' then
-				if (ld_a=(ld_a'range=>'0') and opcd_delay=OPCD_BEQZ and sig_brt_delay='1') or (ld_a/=(reg_a'range=>'0') and opcd_delay=OPCD_BNEZ and sig_brt_delay='1') then
+				if (ld_a=(ld_a'range=>'0') and opcd_delay=OPCD_BEQZ and sig_brt_delay='1') or (ld_a/=(reg_a'range=>'0') and opcd_delay=OPCD_BNEZ and sig_brt_delay='1') or (ld_a/=(ld_a'range=>'0') and opcd_delay=OPCD_BEQZ and sig_brt_delay='0') or (ld_a=(reg_a'range=>'0') and opcd_delay=OPCD_BNEZ and sig_brt_delay='0') then
 					index := index_r_delay;
 					entry := entry_r_delay;
 					entry(0) := sig_brt_delay;
@@ -100,15 +107,16 @@ begin
 					sig_bpw_tmp <= '0';
 				else
 					index := index_r_delay;
-					entry := entry_r_delay;
-					if entry = "10" then
-						bht(index) <= "01";
-					elsif entry = "01" then
-						bht(index) <= "10";
+					val := entry_r_delay(1 downto 0);
+					if val = "10" then
+						val := "01";
+					elsif val = "01" then
+						val := "10";
 					else
-						entry(0) := not sig_brt_delay;
-						bht(index) <= entry;
+						val(0) := not sig_brt_delay;
 					end if;
+					entry := entry_r_delay(BPU_TAG_SIZE+1 downto 2) & val;
+					bht(index) <= entry;
 					sig_bpw <= '1';
 					sig_bpw_tmp <= '1';
 				end if;

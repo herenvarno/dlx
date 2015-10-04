@@ -23,7 +23,6 @@ DEPENDENCE_G=\
 	$(PATH_SRC)/0-Types.vhd
 # Modify here
 DEPENDENCE_L=\
-	../lib/std_logic_textio.vhdl\
 	$(PATH_SRC)/a.a-ControlUnit.core/a.a.a-CwGenerator.vhd\
 	$(PATH_SRC)/a.a-ControlUnit.core/a.a.b-StallGenerator.vhd\
 	$(PATH_SRC)/a.a-ControlUnit.core/a.a.c-Branch.vhd\
@@ -61,7 +60,7 @@ SIMWAVE=$(TBCFGNAME).ghw
 CC=ghdl
 $(TARGET): $(DEPENDENCE_G) $(DEPENDENCE_L) $(COMPONENT) $(TESTBENCH)
 	$(CC) -a --ieee=synopsys $(DEPENDENCE_G) $(DEPENDENCE_L) $(COMPONENT) $(TESTBENCH)
-	$(CC) -e $(TBCFGNAME)
+	$(CC) -e --ieee=synopsys $(TBCFGNAME)
 	cp ../../asm_example/test_dump.txt ./test.asm.mem
 	./$(TBCFGNAME) --wave=$(SIMWAVE) --stop-time=$(MAXSIMTIME)
 	gtkwave $(SIMWAVE)
