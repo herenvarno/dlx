@@ -77,12 +77,12 @@ begin
 
 				if dr_cw(3)='0' then	-- READ
 					if dr_cw(2 downto 1)="01" then	-- HALF WORD
-						dout(7 downto 0) <= data_area(addr_ph);
-						dout(15 downto 8) <= data_area(addr_ph+1);
+						dout(7 downto 0) <= data_area(addr_ph+1);
+						dout(15 downto 8) <= data_area(addr_ph);
 						if (dr_cw(0)='0') then
 							dout(DATA_SIZE-1 downto 16) <= (others => '0');
 						else
-							dout(DATA_SIZE-1 downto 16) <= (others => data_area(addr_ph+1)(7));
+							dout(DATA_SIZE-1 downto 16) <= (others => data_area(addr_ph)(7));
 						end if;
 					elsif dr_cw(2 downto 1)="10" then	-- BYTE
 						dout(7 downto 0) <= data_area(addr_ph);
@@ -92,22 +92,22 @@ begin
 							dout(DATA_SIZE-1 downto 8) <= (others => data_area(addr_ph)(7));
 						end if;
 					else	-- WORD
-						dout(7 downto 0) <= data_area(addr_ph);
-						dout(15 downto 8) <= data_area(addr_ph+1);
-						dout(23 downto 16) <= data_area(addr_ph+2);
-						dout(31 downto 24) <= data_area(addr_ph+3);
+						dout(7 downto 0) <= data_area(addr_ph+3);
+						dout(15 downto 8) <= data_area(addr_ph+2);
+						dout(23 downto 16) <= data_area(addr_ph+1);
+						dout(31 downto 24) <= data_area(addr_ph);
 					end if;
 				else	-- WRITE
 					if dr_cw(2 downto 1)="01" then	-- HALF WORD
-						data_area(addr_ph) <= din(7 downto 0);
-						data_area(addr_ph+1) <= din(15 downto 8);
+						data_area(addr_ph+1) <= din(7 downto 0);
+						data_area(addr_ph) <= din(15 downto 8);
 					elsif dr_cw(2 downto 1)="10" then	-- BYTE
 						data_area(addr_ph) <= din(7 downto 0);
 					else	-- WORD
-						data_area(addr_ph) <= din(7 downto 0);
-						data_area(addr_ph+1) <= din(15 downto 8);
-						data_area(addr_ph+2) <= din(23 downto 16);
-						data_area(addr_ph+3) <= din(31 downto 24);
+						data_area(addr_ph+3) <= din(7 downto 0);
+						data_area(addr_ph+2) <= din(15 downto 8);
+						data_area(addr_ph+1) <= din(23 downto 16);
+						data_area(addr_ph) <= din(31 downto 24);
 					end if;
 				end if;
 			end if;

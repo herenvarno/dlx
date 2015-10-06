@@ -58,13 +58,13 @@ begin
 				readline(mem_fp,file_line);
 				hread(file_line,tmp_data_u);
 				istr := std_logic_vector(unsigned(tmp_data_u));
-				data_area(index) <= istr(7 downto 0);
-				index := index + 1;
-				data_area(index) <= istr(15 downto 8);
+				data_area(index) <= istr(31 downto 24);
 				index := index + 1;
 				data_area(index) <= istr(23 downto 16);
 				index := index + 1;
-				data_area(index) <= istr(31 downto 24);
+				data_area(index) <= istr(15 downto 8);
+				index := index + 1;
+				data_area(index) <= istr(7 downto 0);
 				index := index + 1;
 			end loop;
 		end if;
@@ -81,7 +81,7 @@ begin
 				if index >= IRAM_SIZE then
 					index := IRAM_SIZE-4;
 				end if;
-				iout <= data_area(index+3)&data_area(index+2)&data_area(index+1)&data_area(index);
+				iout <= data_area(index)&data_area(index+1)&data_area(index+2)&data_area(index+3);
 			end if;
 		end if;
 	end process READ_MEM_P;
