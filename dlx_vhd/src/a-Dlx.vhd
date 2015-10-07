@@ -18,9 +18,25 @@ use work.Funcs.all;
 -- ENTITY
 --------------------------------------------------------------------------------
 entity Dlx is
+	generic (
+		ADDR_SIZE : integer := C_SYS_ADDR_SIZE;
+		DATA_SIZE : integer := C_SYS_DATA_SIZE;
+		ISTR_SIZE : integer := C_SYS_ISTR_SIZE;
+		DRCW_SIZE : integer := C_CTR_DRCW_SIZE
+	);
 	port (
 		clk : in std_logic := '0';
-		rst : in std_logic := '0'	-- Active Low
+		rst : in std_logic := '0';	-- Active Low
+		
+		en_iram: out std_logic:='1';
+		pc_bus : out std_logic_vector(ADDR_SIZE-1 downto 0):=(others=>'0');
+		ir_bus : in  std_logic_vector(ISTR_SIZE-1 downto 0):=(others=>'0');
+		
+		en_dram  : out std_logic:='1';
+		addr_bus : out std_logic_vector(ADDR_SIZE-1 downto 0):=(others=>'0');
+		di_bus   : out std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
+		do_bus   : in  std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
+		dr_cw    : out std_logic_vector(DRCW_SIZE-1 downto 0):=(others=>'0')
 	);
 end Dlx;
 
@@ -55,38 +71,7 @@ architecture dlx_arch of Dlx is
 		);
 	end component;
 	
-	-- Instruction RAM
-	component InstructionRam is
-		generic (
-			ADDR_SIZE : integer := C_SYS_ADDR_SIZE;
-			ISTR_SIZE : integer := C_SYS_ISTR_SIZE
-		);
-		port (
-			rst  : in std_logic;
-			clk  : in std_logic;
-			en   : in std_logic;
-			addr : in std_logic_vector(ADDR_SIZE-1 downto 0):=(others=>'0');
-			iout : out std_logic_vector(ISTR_SIZE-1 downto 0)
-		);
-	end component;
 	
-	-- Data RAM 
-	component DataRam is
-		generic (
-			DRCW_SIZE : integer := C_CTR_DRCW_SIZE;	-- Data RAM Control Word: R/W
-			ADDR_SIZE : integer := C_SYS_ADDR_SIZE;
-			DATA_SIZE : integer := C_SYS_DATA_SIZE
-		);
-		port (
-			rst		: in std_logic;
-			clk		: in std_logic;
-			en		: in std_logic;
-			addr	: in std_logic_vector(ADDR_SIZE-1 downto 0):=(others=>'0');
-			din		: in std_logic_vector(DATA_SIZE-1 downto 0);
-			dout	: out std_logic_vector(DATA_SIZE-1 downto 0);
-			dr_cw	: in std_logic_vector(DRCW_SIZE-1 downto 0)
-		);
-	end component;
 	
 	-- Datapath (MISSING!You must include it in your final project!)
 	component DataPath is
@@ -128,24 +113,14 @@ architecture dlx_arch of Dlx is
 	-- CONSTANTS
 	constant FUNC_SIZE : integer := C_SYS_FUNC_SIZE;
 	constant OPCD_SIZE : integer := C_SYS_OPCD_SIZE;
-	constant ADDR_SIZE : integer := C_SYS_ADDR_SIZE;
-	constant DATA_SIZE : integer := C_SYS_DATA_SIZE;
-	constant ISTR_SIZE : integer := C_SYS_ISTR_SIZE;
 	constant CWRD_SIZE : integer := C_SYS_CWRD_SIZE;
-	constant DRCW_SIZE : integer := C_CTR_DRCW_SIZE;
 	constant CALU_SIZE : integer := C_CTR_CALU_SIZE;
 	constant IMME_SIZE : integer := C_SYS_IMME_SIZE;
 
 	-- SIGNALS
-	signal ir_bus	: std_logic_vector(ISTR_SIZE-1 downto 0);
-	signal pc_bus	: std_logic_vector(ADDR_SIZE-1 downto 0);
-	signal di_bus	: std_logic_vector(DATA_SIZE-1 downto 0);
-	signal do_bus	: std_logic_vector(DATA_SIZE-1 downto 0);
-	signal addr_bus : std_logic_vector(ADDR_SIZE-1 downto 0);
 	signal ir		: std_logic_vector(ISTR_SIZE-1 downto 0);
 	signal pc		: std_logic_vector(ADDR_SIZE-1 downto 0);
 	signal cw		: std_logic_vector(CWRD_SIZE-1 downto 0);
-	signal dr_cw	: std_logic_vector(DRCW_SIZE-1 downto 0);
 	signal calu		: std_logic_vector(CALU_SIZE-1 downto 0);
 	signal reg_a_val: std_logic_vector(DATA_SIZE-1 downto 0);
 	signal ld_a_val	: std_logic_vector(DATA_SIZE-1 downto 0);
@@ -162,16 +137,11 @@ begin
 	generic map(ISTR_SIZE, DATA_SIZE, OPCD_SIZE, FUNC_SIZE, CWRD_SIZE, CALU_SIZE)
 	port map(clk, rst, ir, pc, reg_a_val, ld_a_val, sig_bal, sig_bpw, sig_jral, sig_ral, sig_mul, sig_div, sig_sqrt, cw, calu);
 	
-	IR0: InstructionRam
-	generic map(ADDR_SIZE, ISTR_SIZE)
-	port map(rst, clk, cw(CW_S1_LATCH), pc_bus, ir_bus);
-	
-	DR0: DataRam
-	generic map(DRCW_SIZE, ADDR_SIZE, DATA_SIZE)
-	port map(rst, clk, '1', addr_bus, di_bus, do_bus, dr_cw);
-	
 	DP0: DataPath
 	generic map(ADDR_SIZE, DATA_SIZE, ISTR_SIZE, OPCD_SIZE, IMME_SIZE, CWRD_SIZE, CALU_SIZE, DRCW_SIZE)
 	port map(clk, rst, pc_bus, ir_bus, ir, pc, reg_a_val, ld_a_val, addr_bus, do_bus, di_bus, cw, dr_cw, calu, sig_bal, sig_bpw, sig_jral, sig_ral, sig_mul, sig_div, sig_sqrt);
+	
+	en_iram <= cw(CW_S1_LATCH);
+	en_dram <= '1';
 	
 end dlx_arch;
