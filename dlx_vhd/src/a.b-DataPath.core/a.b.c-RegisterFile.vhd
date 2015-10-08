@@ -47,6 +47,8 @@ architecture register_file_arch of RegisterFile is
 	type RegArray_t is array(natural range 0 to REG_NUM-1) of std_logic_vector(DATA_SIZE-1 downto 0); 
 	signal registers : RegArray_t;
 	constant ADDR_SIZE: integer:= MyLog2Ceil(REG_NUM);
+	
+	signal zeros5 : std_logic_vector(MyLog2Ceil(REG_NUM)-1 downto 0):=(others=>'0');
 begin
 	PROC: process(clk)
 	begin
@@ -72,7 +74,7 @@ begin
 						end if;
 					end if;
 					if wr_en = '1' then
-						if wr_addr /= (wr_addr'range => '0') then	-- Keep R0 always 0.
+						if wr_addr /= zeros5 then	-- Keep R0 always 0.
 							registers(to_integer(unsigned(wr_addr))) <= d_in;
 						end if;
 					end if;

@@ -110,6 +110,9 @@ architecture booth_mul_arch of BoothMul is
 	signal adj_sum : std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
 	signal adj_cout : std_logic:='0';
 	signal adj_final, adj_final_mod : std_logic_vector(DATA_SIZE*2-1 downto 0):=(others=>'0');
+	signal adj_mid_h : std_logic_vector(1 downto 0):=(others=>'0');
+	signal adj_mid_l : std_logic_vector(DATA_SIZE*2-3 downto 0):=(others=>'0');
+	signal a_m, b_m: std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');	-- Operands
 begin
 	
 	P0: process(clk, en, en_input, lock)
@@ -135,13 +138,18 @@ begin
 	e_b_dir(DATA_SIZE-1 downto 1)<=b(DATA_SIZE-2 downto 0);
 	e_b_dir(0) <= '0';
 	
+	a_m <= a when b(DATA_SIZE-1)='1' else (others=>'0');
+	b_m <= b when a(DATA_SIZE-1)='1' else (others=>'0');
+	
 	ADJUST0: Adder
 	generic map(DATA_SIZE)
-	port map('0', a, b, adj_sum, adj_cout);
+	port map('0', a_m, b_m, adj_sum, adj_cout);
 	
-	adj_final(DATA_SIZE*2-1) <= (adj_cout xnor adj_sum(DATA_SIZE-1)) and (not sign);
-	adj_final(DATA_SIZE*2-2 downto DATA_SIZE-1) <= ((not adj_sum(DATA_SIZE-1)) & adj_sum(DATA_SIZE-2 downto 0)) and (adj_sum'range=>(not sign));
-	adj_final(DATA_SIZE-2 downto 0) <= (others=>'0');
+	adj_mid_h <= adj_cout & adj_sum(DATA_SIZE-1) when (a(DATA_SIZE-1) and b(DATA_SIZE-1))='0' else (adj_cout and adj_sum(DATA_SIZE-1)) & (not adj_sum(DATA_SIZE-1));
+	adj_mid_l(DATA_SIZE*2-3 downto DATA_SIZE-1) <= adj_sum(DATA_SIZE-2 downto 0);
+	adj_mid_l(DATA_SIZE-2 downto 0) <= (others=>'0');
+	
+	adj_final <= adj_mid_h & adj_mid_l when sign='0' else (others=>'0');
 
 	a_mux <= e_a;
 	b_mux <= e_b;
