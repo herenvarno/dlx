@@ -87,15 +87,14 @@ predict the result of branch in case of Branch After Load (BAL) stall.
 
 \chapter[Structure]{Structure}
 The whole DLX microprocessor is organized in 4 parts: the control unit, the datapath,
-the instruction RAM and the data RAM. As shown in figure \ref{fig:Dlx}
-
+the instruction RAM and the data RAM. As shown in figure \ref{fig:dlx}
 \section[Control Unit]{Control Unit}
 Control Unit mainly produces the control words to control the behavior of our microprocessor's Datapath.
 It also needs to decide how a stall signal affects the pipeline and whether a branch
 is taken or not.
 
 Our microprocessor's Control Unit consists of a Control word generator, a Stall generator and a Branch unit.
-As shown in figure \ref{fig:ControlUnit}
+As shown in figure \ref{fig:cu}
 
 \subsection[Control Word Generator]{Control Word Generator}
 The Control word generator (CwGenerator) is a tiny micro-processor based module with 2 memory levels,
@@ -113,7 +112,7 @@ and F-type instructions.
 At the end of process, depending on {\it branch flag} and {\it stall flag}, the control words will be masked in
 a specific way to form the final control words.
 
-The structure of Control word generator is shown in figure \ref{fig:CwGenerator}
+The structure of Control word generator is shown in figure \ref{fig:cg}
 
 \subsection[Stall Generator]{Stall Generator}
 The Stall Generator deals with different signals which will lead to stall any stage
@@ -135,7 +134,7 @@ Datapath, the former is for following clock cycles and the latter is for the cur
 cycle. Finally, the {\it stall\_flag} signal is produced by performing OR operation between
 the resulting signals obtained from these blocks.
 
-The structure of Stall generator is shown in figure \ref{fig:StallGenerator}
+The structure of Stall generator is shown in figure \ref{fig:sg}
 
 \subsection[Branch]{Branch}
 The Branch Unit calculates the result of branch instructions by checking the value
@@ -145,7 +144,7 @@ is not ready.
 The detail of Branch After Load (BAL) hazard will be covered in section \ref{ch:hazard}. And the
 detail of Branch Prediction will be covered in section \ref{ch:bpu}
 
-The structure of Branch unit is shown in figure \ref{fig:Branch}
+The structure of Branch unit is shown in figure \ref{fig:br}
 
 \section[Datapath]{Datapath}
 
@@ -160,6 +159,9 @@ The structure of Branch unit is shown in figure \ref{fig:Branch}
 The Instruction RAM and Data RAM are implemented like register files. They performs
 either a read operation or a write operation within a single clock cycle without
 data missing.
+
+The structure of IRAM is shown in figure \ref{fig:ir} and the structure of DRAM
+is shown in figure \ref{fig:dr}. 
 
 \section[Hazard Handling]{Hazard Handling}
 \label{ch:hazard}
@@ -177,7 +179,7 @@ indicate the avalability of the feedback values. The output will be a value choo
 components that the output is not correct. The "dirty match" will usually lead to
 a stall process.
 
-The structure of Forwarding unit is shown in figure \ref{fig:Fwd}
+The structure of Forwarding unit is shown in figure \ref{fig:fwd}
 
 \subsection[Read After Load (RAL)]{Read After Load (RAL)}
 The Read After Load (RAL) hazard arises when the value of a register is needed by
@@ -286,6 +288,50 @@ TAG and VALUE. TAG is determined by the first part of branch address (Default 25
 is the current 2-bit state of the branch instruction. The index of each entry is
 determined by the middle part of address (Default 5 bits).
 
+\begin{table}[!ht]
+\centering
+\caption{Address of branch instruction}
+\label{tab:bpu_addr}
+\begin{tabular}{|l|l|l|}
+\hline
+TAG (25 bits) & INDEX (5 bits) & Always 0 for any instruction (2 bits) \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{table}[!ht]
+\centering
+\caption{BHT structure}
+\label{tab:bpu_bht}
+\begin{tabular}{|l|l|}
+\hline
+\multicolumn{2}{ |c| }{ }\\
+\hline
+\multicolumn{2}{ |c| }{....}\\
+\hline
+TAG (25 bits) & VALUE (2 bits) \\
+\hline
+\multicolumn{2}{ |c| }{....}\\
+\hline
+\multicolumn{2}{ |c| }{ }\\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{table}[!ht]
+\centering
+\caption{VALUE Meaning}
+\label{tab:bpu_value}
+\begin{tabular}{|l|l|}
+\hline
+00 & Strongly not taken \\
+01 & Weakly not taken \\
+10 & Weakly taken \\
+11 & Strongly taken \\
+\hline
+\end{tabular}
+\end{table}
+
 The branch prediction can be devided into 2 phases: prediction phase and verification phase.
 
 During the prediction phase (ID stage), it look up the BHT by index, compare the TAG and get the VALUE.
@@ -293,7 +339,13 @@ Based on VALUE, it predict whether the branch will take or not. If the TAG doesn
 the entry will be replaced with the new TAG with VALUE="00".
 
 During the verification phase (EXE stage), it check whether the previous prediction
-is correct or not. and update the VALUE area according the rule shown in figure \ref{fig:bpu}
+is correct or not. and update the VALUE area according the rule shown in figure \ref{fig:bpu_rule}
+\begin{figure}[Ht]
+    \centering
+    \includegraphics[width=0.8\textwidth]{fig/bpu_rule.png}
+    \caption{BHT VALUE update rule}
+    \label{fig:bpu_rule}
+\end{figure}
 
 \section[Long Latency Instructions]{Long Latency Instructions}
 \subsection[Multiplication]{Multiplication}
@@ -404,17 +456,17 @@ get:
 \begin{align*}
 X & >= (a\cdot 2^1+b)^2\\
   & = (a\cdot 2^1)^2+2\cdot a\cdot 2^1 \cdot b + b^2\\
-  & = a<<2 + (ab)<<2 + b^2\\
+  & = 4a + 4(ab) + b^2\\
 So,\\
-R_{n} & = (X-a<<2)\\
-  & >= (ab)<<2 + b^2\\
+R_{n} & = (X-4a)\\
+  & >= 4(ab) + b^2\\
 We\ set:\\
-R_{n+1}^{es} &= R_{n} - [(ab)<<2 + b^2]
+R_{n+1}^{es} &= R_{n} - [4(ab) + b^2]
 \end{align*}
 
 Therefore, let's guess b=1:
 \begin{align*}
-R_{n+1}^{es} &= R_{n} - [a<<2 + 1]
+R_{n+1}^{es} &= R_{n} - [4a + 1]
 \end{align*}
 
 If $R_{n-1}^{es}>=0$, the guess is correct; otherwise, the guess is wrong, we need
@@ -427,7 +479,7 @@ Therefore, we can use the same hardware resources of division with a little modi
 will be appended 01 or 11 instead of left shift 1 bit in each clock cycle and the position of divisor
 will be replaced by shifted intermediate quotient.
 
-An example is shown in figure \ref{tab:sqrt}.
+An example is shown in table \ref{tab:sqrt}.
 
 \begin{table}[!ht]
 \centering
@@ -455,7 +507,7 @@ An example is shown in figure \ref{tab:sqrt}.
 
 \chapter[Synthesis and Optimization]{Synthesis and Optimization}
 For the synthesis part, we only optimized the delay with time constrain $clock=2.5$.
-The critical path is in the stage 2 with are used to generate the jump address. This
+The critical path is in the stage 2 which is used to generate the jump address. This
 is because:
 
 \begin{description}
@@ -483,5 +535,102 @@ Area & After Optimization & 31421.783203 \\
 \end{tabular}
 \end{table}
 
-\chapter[Physical Design]{Physical Design}
+\chapter[Appendix]{Appendix}
+\section[Diagram]{Diagram}
+\begin{figure}[Ht]
+    \centering
+    \includegraphics[width=0.8\textwidth]{fig/dlx.jpg}
+    \caption{DLX overall structure}
+    \label{fig:dlx}
+\end{figure}
+\begin{figure}[Ht]
+    \centering
+    \includegraphics[width=0.8\textwidth]{fig/cu.jpg}
+    \caption{Control Unit}
+    \label{fig:cu}
+\end{figure}
+\begin{figure}[Ht]
+    \centering
+    \includegraphics[width=0.8\textwidth]{fig/cg.jpg}
+    \caption{Control Word Generator}
+    \label{fig:cg}
+\end{figure}
+\begin{figure}[Ht]
+    \centering
+    \includegraphics[width=0.8\textwidth]{fig/sg.jpg}
+    \caption{Stall Generator}
+    \label{fig:sg}
+\end{figure}
+\begin{figure}[Ht]
+    \centering
+    \includegraphics[width=0.8\textwidth]{fig/br.jpg}
+    \caption{Branch Unit}
+    \label{fig:br}
+\end{figure}
+\begin{figure}[Ht]
+    \centering
+    \includegraphics[width=0.8\textwidth]{fig/dp1.jpg}
+    \caption{Datapath (IF)}
+    \label{fig:dp1}
+\end{figure}
+\begin{figure}[Ht]
+    \centering
+    \includegraphics[width=0.8\textwidth]{fig/dp2.jpg}
+    \caption{Datapath (ID)}
+    \label{fig:dp2}
+\end{figure}
+\begin{figure}[Ht]
+    \centering
+    \includegraphics[width=0.8\textwidth]{fig/dp3.jpg}
+    \caption{Datapath (EXE)}
+    \label{fig:dp3}
+\end{figure}
+\begin{figure}[Ht]
+    \centering
+    \includegraphics[width=0.8\textwidth]{fig/dp4.jpg}
+    \caption{Datapath (MEM)}
+    \label{fig:dp4}
+\end{figure}
+\begin{figure}[Ht]
+    \centering
+    \includegraphics[width=0.8\textwidth]{fig/dp5.jpg}
+    \caption{Datapath (WB)}
+    \label{fig:dp5}
+\end{figure}
+\begin{figure}[Ht]
+    \centering
+    \includegraphics[width=0.8\textwidth]{fig/alu.jpg}
+    \caption{ALU}
+    \label{fig:alu}
+\end{figure}
+\begin{figure}[Ht]
+    \centering
+    \includegraphics[width=0.8\textwidth]{fig/mul.jpg}
+    \caption{Multiplier}
+    \label{fig:mul}
+\end{figure}
+\begin{figure}[Ht]
+    \centering
+    \includegraphics[width=0.8\textwidth]{fig/div.jpg}
+    \caption{Divider and SQRT unit}
+    \label{fig:div}
+\end{figure}
+\begin{figure}[Ht]
+    \centering
+    \includegraphics[width=0.8\textwidth]{fig/ir.jpg}
+    \caption{Instruction RAM}
+    \label{fig:ir}
+\end{figure}
+\begin{figure}[Ht]
+    \centering
+    \includegraphics[width=0.8\textwidth]{fig/dr.jpg}
+    \caption{Data RAM}
+    \label{fig:dr}
+\end{figure}
+\begin{figure}[Ht]
+    \centering
+    \includegraphics[width=0.8\textwidth]{fig/fwd.jpg}
+    \caption{Forwarding Unit}
+    \label{fig:fwd}
+\end{figure}
 
