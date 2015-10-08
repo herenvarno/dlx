@@ -102,6 +102,8 @@ architecture div_arch of Div is
 --	signal o_div, o_sqrt: std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
 	signal local_rst, reg_rst : std_logic:='1';
 	
+	signal zeros32: std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
+	
 begin
 	-- Datapath
 	-- INPUT ADJUST
@@ -120,10 +122,10 @@ begin
 	
 	ADJUST0a: AddSub
 	generic map(DATA_SIZE)
-	port map(inv_a_flag, (a'range=>'0'), a, a_adj, open);
+	port map(inv_a_flag, zeros32 , a, a_adj, open);
 	ADJUST0b: AddSub
 	generic map(DATA_SIZE)
-	port map(inv_b_flag, (b'range=>'0'), b, b_adj, open);
+	port map(inv_b_flag, zeros32 , b, b_adj, open);
 
 	a_mod_dir(DATA_SIZE-1 downto 0) <= a_adj;
 	a_mod_dir(DATA_SIZE*2-1 downto DATA_SIZE) <= (others=>'0');
@@ -171,7 +173,7 @@ begin
 	-- NEG q IF NEEDED (FOR DIV)
 	ADJUST: AddSub
 	generic map(DATA_SIZE)
-	port map(inv_q_flag_mod, (q'range=>'0'), q, o, open);
+	port map(inv_q_flag_mod, zeros32, q, o, open);
 	-- MASK HIGH 16 bits to '0' (FOR SQRT)
 --	o_sqrt <= q and x"0000ffff";
 	-- CHOOSE OUTPUT BASED ON func

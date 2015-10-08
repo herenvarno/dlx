@@ -1,30 +1,44 @@
-addi r1,r0,#15
-addi r2,r0,#-7
+# software div
+addi r1, r0, 88
+addi r2, r0, 9
+xor r3, r3, r3
+divide:
+	slt r5, r1, r2
+	bnez r5, finish
+	sub r1, r1, r2
+	addi r3, r3, 1
+	j divide
+finish:
+add r4, r0, r1
 nop
-nop
-nop
-nop
-nop
-sw 1(r0),r1
-sb 1(r1),r2
-nop
-nop
-nop
-nop
-nop
-lw r3,1(r0)
-lw r4,1(r1)
-lb r5,1(r0)
-lb r6,1(r1)
-lbu r7,1(r0)
-lbu r8,1(r1)
-lhu r9,1(r0)
-lhu r10,1(r1)
-nop
-nop
-nop
-nop
-nop
+
+# hardware div with RAL hazzard
+addi r5, r0, 4
+addi r7, r0, -88
+sw 0(r0), r7
+addi r1, r0, 9
+xor r3, r3, r3
+lw r6, 0(r0)
+divu r3, r6, r1
+div r3, r6, r1
+divu r4, r3, r5
 nop
 nop
 
+addui r1, r0, 65535
+lhi r1, 65535
+addui r2, r0, 1
+divu r3, r1, r2
+
+# hardware square root with RAL hazzard
+addi r10, r0, 81
+addi r11, r0, 148996
+sw 4(r0), r10
+xor r3, r3, r3
+lw r12, 4(r0)
+sqrt r3, r12, r0
+sqrt r3, r11, r0
+divu r4, r11, r10
+
+NOOP:
+j NOOP

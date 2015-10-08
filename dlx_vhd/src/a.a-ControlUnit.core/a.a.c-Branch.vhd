@@ -52,6 +52,7 @@ architecture branch_arch of Branch is
 	signal addr_delay: std_logic_vector(ADDR_SIZE-1 downto 0):=(others=>'0');
 	signal index_r, index_r_delay : integer:= 0;
 	signal entry_r, entry_r_delay : std_logic_vector(BPU_TAG_SIZE+1 downto 0);
+	signal zeros32 : std_logic_vector(DATA_SIZE-1 downto 0):=(others=>'0');
 begin
 	P0: process(rst, reg_a, opcd, sig_bal)
 		variable index : integer:= 0;
@@ -74,7 +75,7 @@ begin
 				index_r <= index;
 				entry_r <= entry;
 			else
-				if ((reg_a=(reg_a'range=>'0')) and (opcd=OPCD_BEQZ)) or ((reg_a/=(reg_a'range=>'0')) and (opcd=OPCD_BNEZ)) then
+				if ((reg_a=zeros32) and (opcd=OPCD_BEQZ)) or ((reg_a/=zeros32) and (opcd=OPCD_BNEZ)) then
 					sig_brt <= '1';
 					sig_brt_tmp <= '1';
 				else
@@ -98,7 +99,7 @@ begin
 			sig_bpw_tmp <= '0';
 		else
 			if sig_bal_delay='1' then
-				if (ld_a=(ld_a'range=>'0') and opcd_delay=OPCD_BEQZ and sig_brt_delay='1') or (ld_a/=(reg_a'range=>'0') and opcd_delay=OPCD_BNEZ and sig_brt_delay='1') or (ld_a/=(ld_a'range=>'0') and opcd_delay=OPCD_BEQZ and sig_brt_delay='0') or (ld_a=(reg_a'range=>'0') and opcd_delay=OPCD_BNEZ and sig_brt_delay='0') then
+				if (ld_a=zeros32 and opcd_delay=OPCD_BEQZ and sig_brt_delay='1') or (ld_a/=zeros32 and opcd_delay=OPCD_BNEZ and sig_brt_delay='1') or (ld_a/=zeros32 and opcd_delay=OPCD_BEQZ and sig_brt_delay='0') or (ld_a=zeros32 and opcd_delay=OPCD_BNEZ and sig_brt_delay='0') then
 					index := index_r_delay;
 					entry := entry_r_delay;
 					entry(0) := sig_brt_delay;
