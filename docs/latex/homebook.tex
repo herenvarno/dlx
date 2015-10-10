@@ -133,25 +133,43 @@
 \bigskip
 \centerline{\Huge\bfseries\sf Microelectronics Systems}
 \vspace{2cm}
-\centerline{\LARGE Master degree in Computer Science Engineering}
+\centerline{\LARGE Master degree in Electronic Engineering}
 \vspace{4.4cm}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % GROUP
 % Change the name of your group below
 %
-\centerline{\Large Authors: GROUP ?}
+\centerline{\Large Authors:}
 \vspace{2cm}
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % AUTHORS
 % Change the name of the Group participants here
 %
-\centerline{Yang Yu (s213850), Bryn Lara (sxxxxxx)}
+\centerline{Yang Yu (s213850), Bryan D. Lara Tovar (s217156)}
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \vspace{2cm}
 \centerline{\today}
 \end{titlepage}
+
+
+\newpage
+\chapter[Summary]{Summary}
+This report contains the functionality and details of the implementation of a 5-stage-pipelined
+DLX processor presented as our final project for the course Microelectronics System.
+
+This implementation contains many features which include:
+\begin{itemize}
+	\item A modified Booth's algorithm-based multiplicaton unit for supporting signed and unsigned multiplication.
+	\item A modified Non-Restoring algorithm-based division unit for supporting signed and unsigned division.
+	\item Square Root operation support performed by the modified division unit.
+	\item Branch prediction feature based on 2-bit saturating counter.
+	\item Hazard handling by forwarding techniques.
+\end{itemize}
+
+The synthesis result shows that the final critical path delay of our processor is sufficient
+to $T_{ck}=2.5$. The calculated area after optimizing the delay of critical path was around 31421. 
 
 \tableofcontents
 

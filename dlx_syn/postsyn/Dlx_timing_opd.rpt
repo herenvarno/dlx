@@ -1,0 +1,260 @@
+Information: Updating design information... (UID-85)
+Warning: Design 'Dlx_ADDR_SIZE32_DATA_SIZE32_ISTR_SIZE32_DRCW_SIZE4' contains 2 high-fanout nets. A fanout number of 1000 will be used for delay calculations involving these nets. (TIM-134)
+ 
+****************************************
+Report : timing
+        -path full
+        -delay max
+        -max_paths 1
+Design : Dlx_ADDR_SIZE32_DATA_SIZE32_ISTR_SIZE32_DRCW_SIZE4
+Version: Z-2007.03-SP1
+Date   : Thu Oct  8 02:03:59 2015
+****************************************
+
+ # A fanout number of 1000 was used for high fanout net computations.
+
+Operating Conditions: typical   Library: NangateOpenCellLibrary
+Wire Load Model Mode: top
+
+  Startpoint: DP0/DIV0/c_state_reg[30]
+              (rising edge-triggered flip-flop clocked by clk)
+  Endpoint: DP0/DIV0/REG_Q/dout_reg[0]
+            (rising edge-triggered flip-flop clocked by clk)
+  Path Group: clk
+  Path Type: max
+
+  Des/Clust/Port     Wire Load Model       Library
+  ------------------------------------------------
+  Dlx_ADDR_SIZE32_DATA_SIZE32_ISTR_SIZE32_DRCW_SIZE4
+                     5K_hvratio_1_1        NangateOpenCellLibrary
+
+  Point                                                   Incr       Path
+  --------------------------------------------------------------------------
+  clock clk (rise edge)                                   0.00       0.00
+  clock network delay (ideal)                             0.00       0.00
+  DP0/DIV0/c_state_reg[30]/CK (DFFR_X1)                   0.00 #     0.00 r
+  DP0/DIV0/c_state_reg[30]/Q (DFFR_X1)                    0.09       0.09 f
+  DP0/DIV0/U167/ZN (NOR2_X1)                              0.04       0.13 r
+  DP0/DIV0/U16/ZN (AND2_X1)                               0.04       0.17 r
+  DP0/DIV0/U3/ZN (AND2_X1)                                0.04       0.21 r
+  DP0/DIV0/U24/ZN (NAND3_X1)                              0.04       0.25 f
+  DP0/DIV0/U35/ZN (NOR2_X1)                               0.06       0.31 r
+  DP0/DIV0/U177/ZN (NOR2_X1)                              0.03       0.34 f
+  DP0/DIV0/U33/ZN (AND3_X2)                               0.04       0.38 f
+  DP0/DIV0/MUXa/sel (Mux_DATA_SIZE64)                     0.00       0.38 f
+  DP0/DIV0/MUXa/U71/Z (MUX2_X1)                           0.07       0.46 r
+  DP0/DIV0/MUXa/dout[63] (Mux_DATA_SIZE64)                0.00       0.46 r
+  DP0/DIV0/U241/ZN (INV_X1)                               0.03       0.48 f
+  DP0/DIV0/ADD0/as (AddSub_DATA_SIZE64)                   0.00       0.48 f
+  DP0/DIV0/ADD0/U31/Z (BUF_X1)                            0.05       0.53 f
+  DP0/DIV0/ADD0/U64/ZN (INV_X1)                           0.03       0.56 r
+  DP0/DIV0/ADD0/U63/ZN (NAND2_X1)                         0.02       0.58 f
+  DP0/DIV0/ADD0/U42/ZN (NAND2_X1)                         0.03       0.61 r
+  DP0/DIV0/ADD0/ADDER0/b[1] (Adder_DATA_SIZE64)           0.00       0.61 r
+  DP0/DIV0/ADD0/ADDER0/ADDER0/b[1] (P4Adder_DATA_SIZE64_SPARSITY4)
+                                                          0.00       0.61 r
+  DP0/DIV0/ADD0/ADDER0/ADDER0/CG0/b[1] (P4CarryGenerator_DATA_SIZE64_SPARSITY4)
+                                                          0.00       0.61 r
+  DP0/DIV0/ADD0/ADDER0/ADDER0/CG0/U123/ZN (INV_X1)        0.03       0.64 f
+  DP0/DIV0/ADD0/ADDER0/ADDER0/CG0/U125/ZN (OAI22_X1)      0.05       0.69 r
+  DP0/DIV0/ADD0/ADDER0/ADDER0/CG0/U127/ZN (NAND2_X1)      0.03       0.72 f
+  DP0/DIV0/ADD0/ADDER0/ADDER0/CG0/U130/ZN (AOI21_X1)      0.04       0.76 r
+  DP0/DIV0/ADD0/ADDER0/ADDER0/CG0/U118/ZN (OAI22_X1)      0.04       0.80 f
+  DP0/DIV0/ADD0/ADDER0/ADDER0/CG0/U136/ZN (AOI21_X1)      0.04       0.84 r
+  DP0/DIV0/ADD0/ADDER0/ADDER0/CG0/U137/ZN (OAI22_X1)      0.03       0.88 f
+  DP0/DIV0/ADD0/ADDER0/ADDER0/CG0/U139/ZN (NAND2_X1)      0.03       0.91 r
+  DP0/DIV0/ADD0/ADDER0/ADDER0/CG0/U144/ZN (NAND3_X1)      0.03       0.94 f
+  DP0/DIV0/ADD0/ADDER0/ADDER0/CG0/U55/ZN (NAND2_X1)       0.03       0.97 r
+  DP0/DIV0/ADD0/ADDER0/ADDER0/CG0/U147/ZN (OAI222_X1)     0.04       1.01 f
+  DP0/DIV0/ADD0/ADDER0/ADDER0/CG0/U37/ZN (NAND2_X1)       0.03       1.04 r
+  DP0/DIV0/ADD0/ADDER0/ADDER0/CG0/U68/ZN (AND3_X1)        0.05       1.09 r
+  DP0/DIV0/ADD0/ADDER0/ADDER0/CG0/U52/ZN (NOR2_X1)        0.02       1.11 f
+  DP0/DIV0/ADD0/ADDER0/ADDER0/CG0/U157/ZN (AOI211_X1)     0.05       1.17 r
+  DP0/DIV0/ADD0/ADDER0/ADDER0/CG0/U161/ZN (OAI222_X1)     0.05       1.22 f
+  DP0/DIV0/ADD0/ADDER0/ADDER0/CG0/U58/ZN (NAND2_X1)       0.04       1.25 r
+  DP0/DIV0/ADD0/ADDER0/ADDER0/CG0/U174/ZN (NAND3_X1)      0.03       1.29 f
+  DP0/DIV0/ADD0/ADDER0/ADDER0/CG0/U42/ZN (NAND2_X1)       0.03       1.32 r
+  DP0/DIV0/ADD0/ADDER0/ADDER0/CG0/U175/ZN (OAI222_X1)     0.04       1.36 f
+  DP0/DIV0/ADD0/ADDER0/ADDER0/CG0/U43/ZN (NAND2_X1)       0.03       1.40 r
+  DP0/DIV0/ADD0/ADDER0/ADDER0/CG0/U181/ZN (NAND3_X1)      0.03       1.43 f
+  DP0/DIV0/ADD0/ADDER0/ADDER0/CG0/U92/ZN (NAND2_X1)       0.03       1.46 r
+  DP0/DIV0/ADD0/ADDER0/ADDER0/CG0/U185/ZN (OAI222_X1)     0.04       1.50 f
+  DP0/DIV0/ADD0/ADDER0/ADDER0/CG0/U115/ZN (NAND2_X1)      0.03       1.53 r
+  DP0/DIV0/ADD0/ADDER0/ADDER0/CG0/U192/ZN (NAND3_X1)      0.03       1.56 f
+  DP0/DIV0/ADD0/ADDER0/ADDER0/CG0/U50/ZN (NAND2_X1)       0.03       1.60 r
+  DP0/DIV0/ADD0/ADDER0/ADDER0/CG0/U194/ZN (OAI222_X1)     0.04       1.64 f
+  DP0/DIV0/ADD0/ADDER0/ADDER0/CG0/U196/ZN (AOI21_X1)      0.05       1.68 r
+  DP0/DIV0/ADD0/ADDER0/ADDER0/CG0/U120/ZN (OAI22_X1)      0.03       1.72 f
+  DP0/DIV0/ADD0/ADDER0/ADDER0/CG0/U17/ZN (OR2_X1)         0.06       1.78 f
+  DP0/DIV0/ADD0/ADDER0/ADDER0/CG0/U22/ZN (NAND2_X1)       0.03       1.81 r
+  DP0/DIV0/ADD0/ADDER0/ADDER0/CG0/U23/ZN (NAND2_X1)       0.03       1.84 f
+  DP0/DIV0/ADD0/ADDER0/ADDER0/CG0/U229/ZN (AOI211_X1)     0.05       1.89 r
+  DP0/DIV0/ADD0/ADDER0/ADDER0/CG0/U233/ZN (OAI222_X1)     0.05       1.94 f
+  DP0/DIV0/ADD0/ADDER0/ADDER0/CG0/U32/ZN (NAND2_X1)       0.03       1.97 r
+  DP0/DIV0/ADD0/ADDER0/ADDER0/CG0/U33/ZN (AND2_X1)        0.04       2.01 r
+  DP0/DIV0/ADD0/ADDER0/ADDER0/CG0/U246/ZN (OAI222_X1)     0.04       2.06 f
+  DP0/DIV0/ADD0/ADDER0/ADDER0/CG0/U27/ZN (NAND2_X1)       0.03       2.09 r
+  DP0/DIV0/ADD0/ADDER0/ADDER0/CG0/U28/ZN (AND2_X1)        0.04       2.13 r
+  DP0/DIV0/ADD0/ADDER0/ADDER0/CG0/U258/ZN (OAI222_X1)     0.04       2.17 f
+  DP0/DIV0/ADD0/ADDER0/ADDER0/CG0/U48/ZN (NAND2_X1)       0.03       2.20 r
+  DP0/DIV0/ADD0/ADDER0/ADDER0/CG0/U265/ZN (NAND3_X1)      0.03       2.23 f
+  DP0/DIV0/ADD0/ADDER0/ADDER0/CG0/U117/ZN (NAND2_X1)      0.05       2.29 r
+  DP0/DIV0/ADD0/ADDER0/ADDER0/CG0/cout[14] (P4CarryGenerator_DATA_SIZE64_SPARSITY4)
+                                                          0.00       2.29 r
+  DP0/DIV0/ADD0/ADDER0/ADDER0/SG0/cin[15] (AdderSumGenerator_DATA_SIZE64_SPARSITY4)
+                                                          0.00       2.29 r
+  DP0/DIV0/ADD0/ADDER0/ADDER0/SG0/ACSi_15/sel (AdderCarrySelect_DATA_SIZE4_17)
+                                                          0.00       2.29 r
+  DP0/DIV0/ADD0/ADDER0/ADDER0/SG0/ACSi_15/MUX0/sel (Mux_DATA_SIZE4_17)
+                                                          0.00       2.29 r
+  DP0/DIV0/ADD0/ADDER0/ADDER0/SG0/ACSi_15/MUX0/U4/Z (MUX2_X1)
+                                                          0.09       2.37 f
+  DP0/DIV0/ADD0/ADDER0/ADDER0/SG0/ACSi_15/MUX0/dout[3] (Mux_DATA_SIZE4_17)
+                                                          0.00       2.37 f
+  DP0/DIV0/ADD0/ADDER0/ADDER0/SG0/ACSi_15/sum[3] (AdderCarrySelect_DATA_SIZE4_17)
+                                                          0.00       2.37 f
+  DP0/DIV0/ADD0/ADDER0/ADDER0/SG0/sum[63] (AdderSumGenerator_DATA_SIZE64_SPARSITY4)
+                                                          0.00       2.37 f
+  DP0/DIV0/ADD0/ADDER0/ADDER0/s[63] (P4Adder_DATA_SIZE64_SPARSITY4)
+                                                          0.00       2.37 f
+  DP0/DIV0/ADD0/ADDER0/s[63] (Adder_DATA_SIZE64)          0.00       2.37 f
+  DP0/DIV0/ADD0/re[63] (AddSub_DATA_SIZE64)               0.00       2.37 f
+  DP0/DIV0/U156/ZN (INV_X1)                               0.03       2.40 r
+  DP0/DIV0/REG_Q/din (Sipo_DATA_SIZE32)                   0.00       2.40 r
+  DP0/DIV0/REG_Q/U86/ZN (NAND2_X1)                        0.03       2.43 f
+  DP0/DIV0/REG_Q/U85/ZN (NAND2_X1)                        0.03       2.46 r
+  DP0/DIV0/REG_Q/dout_reg[0]/D (DFFR_X1)                  0.01       2.47 r
+  data arrival time                                                  2.47
+
+  clock clk (rise edge)                                   2.50       2.50
+  clock network delay (ideal)                             0.00       2.50
+  DP0/DIV0/REG_Q/dout_reg[0]/CK (DFFR_X1)                 0.00       2.50 r
+  library setup time                                     -0.03       2.47
+  data required time                                                 2.47
+  --------------------------------------------------------------------------
+  data required time                                                 2.47
+  data arrival time                                                 -2.47
+  --------------------------------------------------------------------------
+  slack (MET)                                                        0.00
+
+
+  Startpoint: ir_bus[28] (input port)
+  Endpoint: pc_bus[30] (output port)
+  Path Group: default
+  Path Type: max
+
+  Des/Clust/Port     Wire Load Model       Library
+  ------------------------------------------------
+  Dlx_ADDR_SIZE32_DATA_SIZE32_ISTR_SIZE32_DRCW_SIZE4
+                     5K_hvratio_1_1        NangateOpenCellLibrary
+
+  Point                                                   Incr       Path
+  --------------------------------------------------------------------------
+  input external delay                                    0.00       0.00 f
+  ir_bus[28] (in)                                         0.00       0.00 f
+  DP0/istr_val[28] (DataPath_ADDR_SIZE32_DATA_SIZE32_ISTR_SIZE32_OPCD_SIZE6_IMME_SIZE16_CWRD_SIZE20_CALU_SIZE5_DRCW_SIZE4)
+                                                          0.00       0.00 f
+  DP0/U15/Z (BUF_X1)                                      0.04       0.04 f
+  DP0/U18/ZN (AND3_X1)                                    0.04       0.08 f
+  DP0/U80/ZN (NAND4_X1)                                   0.03       0.11 r
+  DP0/U8/ZN (AND2_X1)                                     0.05       0.16 r
+  DP0/MUX_JPC0/din0[1] (Mux_DATA_SIZE32_7)                0.00       0.16 r
+  DP0/MUX_JPC0/U46/ZN (AOI22_X1)                          0.03       0.19 f
+  DP0/MUX_JPC0/U6/ZN (INV_X1)                             0.04       0.23 r
+  DP0/MUX_JPC0/dout[1] (Mux_DATA_SIZE32_7)                0.00       0.23 r
+  DP0/ADDER_ADDR/b[1] (Adder_DATA_SIZE32_7)               0.00       0.23 r
+  DP0/ADDER_ADDR/ADDER0/b[1] (P4Adder_DATA_SIZE32_SPARSITY4_7)
+                                                          0.00       0.23 r
+  DP0/ADDER_ADDR/ADDER0/CG0/b[1] (P4CarryGenerator_DATA_SIZE32_SPARSITY4_7)
+                                                          0.00       0.23 r
+  DP0/ADDER_ADDR/ADDER0/CG0/U83/ZN (INV_X1)               0.03       0.26 f
+  DP0/ADDER_ADDR/ADDER0/CG0/U90/ZN (NAND2_X1)             0.03       0.29 r
+  DP0/ADDER_ADDR/ADDER0/CG0/U74/ZN (OAI211_X1)            0.04       0.33 f
+  DP0/ADDER_ADDR/ADDER0/CG0/U88/ZN (NAND2_X1)             0.04       0.37 r
+  DP0/ADDER_ADDR/ADDER0/CG0/syn264/ZN (NAND3_X1)          0.04       0.41 f
+  DP0/ADDER_ADDR/ADDER0/CG0/U84/ZN (NAND2_X1)             0.03       0.44 r
+  DP0/ADDER_ADDR/ADDER0/CG0/U80/ZN (OAI21_X1)             0.03       0.47 f
+  DP0/ADDER_ADDR/ADDER0/CG0/U136/ZN (NOR2_X1)             0.04       0.52 r
+  DP0/ADDER_ADDR/ADDER0/CG0/U87/ZN (NOR2_X1)              0.02       0.54 f
+  DP0/ADDER_ADDR/ADDER0/CG0/U79/ZN (NOR2_X1)              0.04       0.58 r
+  DP0/ADDER_ADDR/ADDER0/CG0/U81/ZN (OAI21_X1)             0.04       0.61 f
+  DP0/ADDER_ADDR/ADDER0/CG0/U93/ZN (AOI21_X1)             0.05       0.66 r
+  DP0/ADDER_ADDR/ADDER0/CG0/U158/ZN (NAND2_X1)            0.03       0.69 f
+  DP0/ADDER_ADDR/ADDER0/CG0/U147/ZN (AOI22_X1)            0.05       0.74 r
+  DP0/ADDER_ADDR/ADDER0/CG0/U108/ZN (NOR2_X1)             0.02       0.76 f
+  DP0/ADDER_ADDR/ADDER0/CG0/U146/ZN (OAI22_X1)            0.04       0.80 r
+  DP0/ADDER_ADDR/ADDER0/CG0/U105/ZN (NAND2_X1)            0.04       0.84 f
+  DP0/ADDER_ADDR/ADDER0/CG0/U140/ZN (NAND2_X1)            0.03       0.87 r
+  DP0/ADDER_ADDR/ADDER0/CG0/U160/ZN (AND2_X1)             0.04       0.91 r
+  DP0/ADDER_ADDR/ADDER0/CG0/U152/ZN (OAI222_X1)           0.05       0.96 f
+  DP0/ADDER_ADDR/ADDER0/CG0/U56/ZN (NAND2_X1)             0.04       1.00 r
+  DP0/ADDER_ADDR/ADDER0/CG0/U62/ZN (AOI21_X1)             0.03       1.03 f
+  DP0/ADDER_ADDR/ADDER0/CG0/U63/ZN (NOR2_X1)              0.04       1.07 r
+  DP0/ADDER_ADDR/ADDER0/CG0/U58/ZN (NAND3_X1)             0.04       1.11 f
+  DP0/ADDER_ADDR/ADDER0/CG0/U64/ZN (NAND2_X1)             0.03       1.14 r
+  DP0/ADDER_ADDR/ADDER0/CG0/U61/ZN (NAND2_X1)             0.03       1.17 f
+  DP0/ADDER_ADDR/ADDER0/CG0/U68/ZN (AOI21_X1)             0.04       1.21 r
+  DP0/ADDER_ADDR/ADDER0/CG0/U69/ZN (NAND2_X1)             0.03       1.24 f
+  DP0/ADDER_ADDR/ADDER0/CG0/U57/ZN (NAND2_X1)             0.03       1.26 r
+  DP0/ADDER_ADDR/ADDER0/CG0/U148/ZN (AND2_X1)             0.05       1.31 r
+  DP0/ADDER_ADDR/ADDER0/CG0/U109/ZN (OAI22_X1)            0.04       1.35 f
+  DP0/ADDER_ADDR/ADDER0/CG0/U149/ZN (INV_X1)              0.04       1.38 r
+  DP0/ADDER_ADDR/ADDER0/CG0/U143/ZN (OAI21_X1)            0.03       1.41 f
+  DP0/ADDER_ADDR/ADDER0/CG0/U101/ZN (NAND2_X1)            0.03       1.44 r
+  DP0/ADDER_ADDR/ADDER0/CG0/U162/ZN (AOI22_X1)            0.03       1.48 f
+  DP0/ADDER_ADDR/ADDER0/CG0/U159/ZN (OAI22_X1)            0.04       1.52 r
+  DP0/ADDER_ADDR/ADDER0/CG0/U157/ZN (AOI22_X1)            0.04       1.56 f
+  DP0/ADDER_ADDR/ADDER0/CG0/U103/ZN (OAI22_X1)            0.07       1.63 r
+  DP0/ADDER_ADDR/ADDER0/CG0/cout[6] (P4CarryGenerator_DATA_SIZE32_SPARSITY4_7)
+                                                          0.00       1.63 r
+  DP0/ADDER_ADDR/ADDER0/SG0/cin[7] (AdderSumGenerator_DATA_SIZE32_SPARSITY4_7)
+                                                          0.00       1.63 r
+  DP0/ADDER_ADDR/ADDER0/SG0/ACSi_7/sel (AdderCarrySelect_DATA_SIZE4_69)
+                                                          0.00       1.63 r
+  DP0/ADDER_ADDR/ADDER0/SG0/ACSi_7/MUX0/sel (Mux_DATA_SIZE4_69)
+                                                          0.00       1.63 r
+  DP0/ADDER_ADDR/ADDER0/SG0/ACSi_7/MUX0/U14/ZN (INV_X1)
+                                                          0.03       1.66 f
+  DP0/ADDER_ADDR/ADDER0/SG0/ACSi_7/MUX0/U4/Z (CLKBUF_X1)
+                                                          0.05       1.71 f
+  DP0/ADDER_ADDR/ADDER0/SG0/ACSi_7/MUX0/U13/ZN (AOI22_X1)
+                                                          0.05       1.76 r
+  DP0/ADDER_ADDR/ADDER0/SG0/ACSi_7/MUX0/U8/ZN (INV_X1)
+                                                          0.02       1.78 f
+  DP0/ADDER_ADDR/ADDER0/SG0/ACSi_7/MUX0/dout[2] (Mux_DATA_SIZE4_69)
+                                                          0.00       1.78 f
+  DP0/ADDER_ADDR/ADDER0/SG0/ACSi_7/sum[2] (AdderCarrySelect_DATA_SIZE4_69)
+                                                          0.00       1.78 f
+  DP0/ADDER_ADDR/ADDER0/SG0/sum[30] (AdderSumGenerator_DATA_SIZE32_SPARSITY4_7)
+                                                          0.00       1.78 f
+  DP0/ADDER_ADDR/ADDER0/s[30] (P4Adder_DATA_SIZE32_SPARSITY4_7)
+                                                          0.00       1.78 f
+  DP0/ADDER_ADDR/s[30] (Adder_DATA_SIZE32_7)              0.00       1.78 f
+  DP0/MUX_JPC1/din0[30] (Mux_DATA_SIZE32_6)               0.00       1.78 f
+  DP0/MUX_JPC1/U59/ZN (AOI22_X1)                          0.04       1.83 r
+  DP0/MUX_JPC1/U60/ZN (INV_X1)                            0.03       1.85 f
+  DP0/MUX_JPC1/dout[30] (Mux_DATA_SIZE32_6)               0.00       1.85 f
+  DP0/MUX_PC/din1[30] (Mux_DATA_SIZE32_9)                 0.00       1.85 f
+  DP0/MUX_PC/U55/ZN (AOI22_X1)                            0.06       1.91 r
+  DP0/MUX_PC/U39/ZN (INV_X1)                              0.02       1.93 f
+  DP0/MUX_PC/dout[30] (Mux_DATA_SIZE32_9)                 0.00       1.93 f
+  DP0/MUX_bpw/din0[30] (Mux_DATA_SIZE32_0)                0.00       1.93 f
+  DP0/MUX_bpw/U73/ZN (AOI22_X1)                           0.04       1.98 r
+  DP0/MUX_bpw/U70/ZN (INV_X1)                             0.05       2.03 f
+  DP0/MUX_bpw/dout[30] (Mux_DATA_SIZE32_0)                0.00       2.03 f
+  DP0/istr_addr[30] (DataPath_ADDR_SIZE32_DATA_SIZE32_ISTR_SIZE32_OPCD_SIZE6_IMME_SIZE16_CWRD_SIZE20_CALU_SIZE5_DRCW_SIZE4)
+                                                          0.00       2.03 f
+  pc_bus[30] (out)                                        0.01       2.03 f
+  data arrival time                                                  2.03
+
+  max_delay                                               2.50       2.50
+  output external delay                                   0.00       2.50
+  data required time                                                 2.50
+  --------------------------------------------------------------------------
+  data required time                                                 2.50
+  data arrival time                                                 -2.03
+  --------------------------------------------------------------------------
+  slack (MET)                                                        0.47
+
+
+1

@@ -12,5 +12,7 @@
    13  00000024  240affff	addui r10, r0, #65535
    14  00000028  240b0c1c	addui r11, r0, #3100
    15  0000002c  056a6016	multu r12, r11, r10
-   17  00000030          	fine:
-   18  00000030  0bfffffc	j fine
+   17  00000030  240dffff	addui r13, r0, #65535
+   18  00000034  054d7016	multu r14, r10, r13
+   20  00000038          	fine:
+   21  00000038  0bfffffc	j fine

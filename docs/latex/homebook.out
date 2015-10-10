@@ -1,29 +1,31 @@
-\BOOKMARK [0][-]{chapter.1}{Overview and Features}{}% 1
-\BOOKMARK [0][-]{chapter.2}{Structure}{}% 2
-\BOOKMARK [1][-]{section.2.1}{Control Unit}{chapter.2}% 3
-\BOOKMARK [2][-]{subsection.2.1.1}{Control Word Generator}{section.2.1}% 4
-\BOOKMARK [2][-]{subsection.2.1.2}{Stall Generator}{section.2.1}% 5
-\BOOKMARK [2][-]{subsection.2.1.3}{Branch}{section.2.1}% 6
-\BOOKMARK [1][-]{section.2.2}{Datapath}{chapter.2}% 7
-\BOOKMARK [2][-]{subsection.2.2.1}{IF}{section.2.2}% 8
-\BOOKMARK [2][-]{subsection.2.2.2}{ID}{section.2.2}% 9
-\BOOKMARK [2][-]{subsection.2.2.3}{EXE}{section.2.2}% 10
-\BOOKMARK [2][-]{subsection.2.2.4}{MEM}{section.2.2}% 11
-\BOOKMARK [2][-]{subsection.2.2.5}{WB}{section.2.2}% 12
-\BOOKMARK [2][-]{subsection.2.2.6}{EXTRA}{section.2.2}% 13
-\BOOKMARK [1][-]{section.2.3}{RAM}{chapter.2}% 14
-\BOOKMARK [1][-]{section.2.4}{Hazard Handling}{chapter.2}% 15
-\BOOKMARK [2][-]{subsection.2.4.1}{Forwarding}{section.2.4}% 16
-\BOOKMARK [2][-]{subsection.2.4.2}{Read After Load \(RAL\)}{section.2.4}% 17
-\BOOKMARK [2][-]{subsection.2.4.3}{JR After Load \(JRAL\)}{section.2.4}% 18
-\BOOKMARK [2][-]{subsection.2.4.4}{Branch After Load \(BAL\)}{section.2.4}% 19
-\BOOKMARK [2][-]{subsection.2.4.5}{Store After After Write \(SAAW\)}{section.2.4}% 20
-\BOOKMARK [2][-]{subsection.2.4.6}{Long Latency Execution}{section.2.4}% 21
-\BOOKMARK [1][-]{section.2.5}{Branch Prediction}{chapter.2}% 22
-\BOOKMARK [1][-]{section.2.6}{Long Latency Instructions}{chapter.2}% 23
-\BOOKMARK [2][-]{subsection.2.6.1}{Multiplication}{section.2.6}% 24
-\BOOKMARK [2][-]{subsection.2.6.2}{Division}{section.2.6}% 25
-\BOOKMARK [2][-]{subsection.2.6.3}{Square Root}{section.2.6}% 26
-\BOOKMARK [0][-]{chapter.3}{Synthesis and Optimization}{}% 27
-\BOOKMARK [0][-]{chapter.4}{Appendix}{}% 28
-\BOOKMARK [1][-]{section.4.1}{Diagram}{chapter.4}% 29
+\BOOKMARK [0][-]{chapter*.1}{Summary}{}% 1
+\BOOKMARK [0][-]{chapter.1}{Introduction}{}% 2
+\BOOKMARK [0][-]{chapter.2}{Functional Schema}{}% 3
+\BOOKMARK [0][-]{chapter.3}{Implementation}{}% 4
+\BOOKMARK [1][-]{section.3.1}{Control Unit}{chapter.3}% 5
+\BOOKMARK [2][-]{subsection.3.1.1}{Control Word Generator}{section.3.1}% 6
+\BOOKMARK [2][-]{subsection.3.1.2}{Stall Generator}{section.3.1}% 7
+\BOOKMARK [2][-]{subsection.3.1.3}{Branch}{section.3.1}% 8
+\BOOKMARK [1][-]{section.3.2}{Datapath}{chapter.3}% 9
+\BOOKMARK [2][-]{subsection.3.2.1}{IF \(Stage 1\)}{section.3.2}% 10
+\BOOKMARK [2][-]{subsection.3.2.2}{ID \(Stage 2\)}{section.3.2}% 11
+\BOOKMARK [2][-]{subsection.3.2.3}{EXE \(Stage 3\)}{section.3.2}% 12
+\BOOKMARK [2][-]{subsection.3.2.4}{MEM \(Stage 4\)}{section.3.2}% 13
+\BOOKMARK [2][-]{subsection.3.2.5}{WB \(Stage 5\)}{section.3.2}% 14
+\BOOKMARK [2][-]{subsection.3.2.6}{EXTRA \(Stage 6\)}{section.3.2}% 15
+\BOOKMARK [1][-]{section.3.3}{RAM}{chapter.3}% 16
+\BOOKMARK [1][-]{section.3.4}{Hazard Handling}{chapter.3}% 17
+\BOOKMARK [2][-]{subsection.3.4.1}{Forwarding}{section.3.4}% 18
+\BOOKMARK [2][-]{subsection.3.4.2}{Read After Load \(RAL\)}{section.3.4}% 19
+\BOOKMARK [2][-]{subsection.3.4.3}{JR After Load \(JRAL\)}{section.3.4}% 20
+\BOOKMARK [2][-]{subsection.3.4.4}{Branch After Load \(BAL\)}{section.3.4}% 21
+\BOOKMARK [2][-]{subsection.3.4.5}{Store After-After Write \(SAAW\)}{section.3.4}% 22
+\BOOKMARK [2][-]{subsection.3.4.6}{Long Latency Execution}{section.3.4}% 23
+\BOOKMARK [1][-]{section.3.5}{Branch Prediction}{chapter.3}% 24
+\BOOKMARK [1][-]{section.3.6}{Long Latency Instructions}{chapter.3}% 25
+\BOOKMARK [2][-]{subsection.3.6.1}{Multiplication}{section.3.6}% 26
+\BOOKMARK [2][-]{subsection.3.6.2}{Division}{section.3.6}% 27
+\BOOKMARK [2][-]{subsection.3.6.3}{Square Root}{section.3.6}% 28
+\BOOKMARK [1][-]{section.3.7}{Synthesis and Optimization}{chapter.3}% 29
+\BOOKMARK [0][-]{chapter.4}{Discussion and Conclusions}{}% 30
+\BOOKMARK [0][-]{chapter.5}{References}{}% 31

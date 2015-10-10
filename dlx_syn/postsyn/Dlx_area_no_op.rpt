@@ -1,0 +1,24 @@
+ 
+****************************************
+Report : area
+Design : Dlx_ADDR_SIZE32_DATA_SIZE32_ISTR_SIZE32_DRCW_SIZE4
+Version: Z-2007.03-SP1
+Date   : Thu Oct  8 01:58:07 2015
+****************************************
+
+Library(s) Used:
+
+    NangateOpenCellLibrary (File: /home/mariagrazia.graziano/do/libnangate/NangateOpenCellLibrary_typical_ecsm.db)
+
+Number of ports:              168
+Number of nets:               327
+Number of cells:                2
+Number of references:           2
+
+Combinational area:       16835.938006
+Noncombinational area:    13684.902371
+Net Interconnect area:      undefined  (Wire load has zero net area)
+
+Total cell area:          30520.839844
+Total area:                 undefined
+1

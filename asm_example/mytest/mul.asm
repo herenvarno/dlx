@@ -14,5 +14,8 @@ addui r10, r0, #65535
 addui r11, r0, #3100
 multu r12, r11, r10
 
+addui r13, r0, #65535
+multu r14, r10, r13
+
 fine:
 j fine

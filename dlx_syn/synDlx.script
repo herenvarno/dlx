@@ -1,0 +1,48 @@
+# Analysis
+analyze -library WORK -format vhdl {../dlx_vhd/src/0-Consts.vhd}
+analyze -library WORK -format vhdl {../dlx_vhd/src/0-Funcs.vhd}
+analyze -library WORK -format vhdl {../dlx_vhd/src/0-Types.vhd}
+analyze -library WORK -format vhdl {../dlx_vhd/src/a.a-ControlUnit.core/a.a.a-CwGenerator.vhd}
+analyze -library WORK -format vhdl {../dlx_vhd/src/a.a-ControlUnit.core/a.a.b-StallGenerator.vhd}
+analyze -library WORK -format vhdl {../dlx_vhd/src/a.a-ControlUnit.core/a.a.c-Branch.vhd}
+analyze -library WORK -format vhdl {../dlx_vhd/src/a.a-ControlUnit.vhd}
+analyze -library WORK -format vhdl {../dlx_vhd/src/a.b-DataPath.core/a.b.0-Mux.vhd}
+analyze -library WORK -format vhdl {../dlx_vhd/src/a.b-DataPath.core/a.b.0-Mux4.vhd}
+analyze -library WORK -format vhdl {../dlx_vhd/src/a.b-DataPath.core/a.b.0-Reg.vhd}
+analyze -library WORK -format vhdl {../dlx_vhd/src/a.b-DataPath.core/a.b.0-Sipo.vhd}
+analyze -library WORK -format vhdl {../dlx_vhd/src/a.b-DataPath.core/a.b.a-Alu.core/a.b.a.a-Adder.core/a.b.a.a.0-FullAdder.vhd}
+analyze -library WORK -format vhdl {../dlx_vhd/src/a.b-DataPath.core/a.b.a-Alu.core/a.b.a.a-Adder.core/a.b.a.a.0-Rca.vhd}
+analyze -library WORK -format vhdl {../dlx_vhd/src/a.b-DataPath.core/a.b.a-Alu.core/a.b.a.a-Adder.core/a.b.a.a.0-AdderCarrySelect.vhd}
+analyze -library WORK -format vhdl {../dlx_vhd/src/a.b-DataPath.core/a.b.a-Alu.core/a.b.a.a-Adder.core/a.b.a.a.0-AdderSumGenerator.vhd}
+analyze -library WORK -format vhdl {../dlx_vhd/src/a.b-DataPath.core/a.b.a-Alu.core/a.b.a.a-Adder.core/a.b.a.a.0-P4AdderCarryGenerator.vhd}
+analyze -library WORK -format vhdl {../dlx_vhd/src/a.b-DataPath.core/a.b.a-Alu.core/a.b.a.a-Adder.core/a.b.a.a.a-P4Adder.vhd}
+analyze -library WORK -format vhdl {../dlx_vhd/src/a.b-DataPath.core/a.b.a-Alu.core/a.b.a.a-Adder.vhd}
+analyze -library WORK -format vhdl {../dlx_vhd/src/a.b-DataPath.core/a.b.a-Alu.core/a.b.a.b-Shifter.vhd}
+analyze -library WORK -format vhdl {../dlx_vhd/src/a.b-DataPath.core/a.b.a-Alu.vhd}
+analyze -library WORK -format vhdl {../dlx_vhd/src/a.b-DataPath.core/a.b.b-Extender.vhd}
+analyze -library WORK -format vhdl {../dlx_vhd/src/a.b-DataPath.core/a.b.c-RegisterFile.vhd}
+analyze -library WORK -format vhdl {../dlx_vhd/src/a.b-DataPath.core/a.b.e-FwdMux2.vhd}
+analyze -library WORK -format vhdl {../dlx_vhd/src/a.b-DataPath.core/a.b.f-Mul.core/a.b.f.0-AddSub.vhd}
+analyze -library WORK -format vhdl {../dlx_vhd/src/a.b-DataPath.core/a.b.f-Mul.core/a.b.f.0-BoothEncoder.vhd}
+analyze -library WORK -format vhdl {../dlx_vhd/src/a.b-DataPath.core/a.b.f-Mul.core/a.b.f.0-BoothGenerator.vhd}
+analyze -library WORK -format vhdl {../dlx_vhd/src/a.b-DataPath.core/a.b.f-Mul.core/a.b.f.a-BoothMul.vhd}
+analyze -library WORK -format vhdl {../dlx_vhd/src/a.b-DataPath.core/a.b.f-Mul.vhd}
+analyze -library WORK -format vhdl {../dlx_vhd/src/a.b-DataPath.core/a.b.g-Div.vhd}
+analyze -library WORK -format vhdl {../dlx_vhd/src/a.b-DataPath.vhd}
+analyze -library WORK -format vhdl {../dlx_vhd/src/a-Dlx.vhd}
+
+elaborate Dlx -architecture dlx_arch -library WORK -parameters "ADDR_SIZE=32, DATA_SIZE = 32, ISTR_SIZE=32, DRCW_SIZE=4"
+
+# Compile without constrain
+compile -exact_map
+write -hierarchy -format vhdl -output postsyn/Dlx_no_op.vhdl
+report_timing > postsyn/Dlx_timing_no_op.rpt
+report_area > postsyn/Dlx_area_no_op.rpt
+
+# Compile with constrain
+create_clock -name "clk" -period 2.5 clk
+set_max_delay 2.5 -from [all_inputs] -to [all_outputs]
+compile -map_effort high
+write -hierarchy -format vhdl -output postsyn/Dlx_opd.vhdl
+report_timing > postsyn/Dlx_timing_opd.rpt
+report_area > postsyn/Dlx_area_opd.rpt
